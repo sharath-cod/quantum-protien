@@ -1,0 +1,7 @@
+firebase_service_account.json
+protein_results.db
+__pycache__/
+*.pyc
+.env
+venv/
+env/
