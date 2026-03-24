@@ -4,3 +4,5 @@ firebase-admin
 gunicorn
 numpy
 scipy
+qiskit
+qiskit-aer
