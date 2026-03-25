@@ -517,7 +517,7 @@ nav{position:relative;z-index:10;background:var(--bg2);border-bottom:2px solid v
 .badge-tip{position:relative;cursor:pointer;}
 .badge-tip::after{
   content:attr(data-tip);
-  position:absolute;bottom:calc(100% + 10px);right:0;
+  position:absolute;top:calc(100% + 10px);right:0;
   background:#0f2027;color:#cffafe;
   border:1px solid rgba(13,148,136,.5);border-radius:8px;
   padding:.6rem .9rem;font-size:.72rem;font-family:'Exo 2',sans-serif;
@@ -526,10 +526,27 @@ nav{position:relative;z-index:10;background:var(--bg2);border-bottom:2px solid v
   box-shadow:0 6px 24px rgba(0,0,0,.35);
   opacity:0;pointer-events:none;
   transition:opacity .2s,transform .2s;
-  transform:translateY(4px);
+  transform:translateY(-4px);
   z-index:9999;
 }
 .badge-tip:hover::after{opacity:1;transform:translateY(0);}
+/* STAT CARD TOOLTIP — same style but anchored below the card */
+.stat-tip{position:relative;cursor:help;}
+.stat-tip::after{
+  content:attr(data-tip);
+  position:absolute;top:calc(100% + 10px);left:50%;
+  transform:translateX(-50%) translateY(-4px);
+  background:#0f2027;color:#cffafe;
+  border:1px solid rgba(13,148,136,.5);border-radius:8px;
+  padding:.6rem .9rem;font-size:.72rem;font-family:'Exo 2',sans-serif;
+  letter-spacing:.5px;line-height:1.6;
+  width:230px;white-space:normal;
+  box-shadow:0 6px 24px rgba(0,0,0,.35);
+  opacity:0;pointer-events:none;
+  transition:opacity .2s,transform .2s;
+  z-index:9999;
+}
+.stat-tip:hover::after{opacity:1;transform:translateX(-50%) translateY(0);}
 /* unknown-warn */
 .unknown-warn{background:rgba(217,119,6,.08);border:1px solid rgba(217,119,6,.3);
   border-radius:8px;padding:.7rem 1rem;margin-bottom:.8rem;display:none;}
