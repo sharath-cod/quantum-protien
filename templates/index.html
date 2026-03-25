@@ -513,7 +513,24 @@ nav{position:relative;z-index:10;background:var(--bg2);border-bottom:2px solid v
   color:rgba(255,255,255,.8);font-family:'Exo 2',sans-serif;font-size:.75rem;padding:.3rem .6rem;
   cursor:pointer;transition:all .2s;}
 .btn-signout:hover{border-color:#fca5a5;color:#fca5a5;}
-/* Unknown warning */
+/* BADGE TOOLTIP */
+.badge-tip{position:relative;cursor:pointer;}
+.badge-tip::after{
+  content:attr(data-tip);
+  position:absolute;top:calc(100% + 10px);right:0;
+  background:#0f2027;color:#cffafe;
+  border:1px solid rgba(13,148,136,.5);border-radius:8px;
+  padding:.6rem .9rem;font-size:.72rem;font-family:'Exo 2',sans-serif;
+  letter-spacing:.5px;line-height:1.6;
+  width:260px;white-space:normal;
+  box-shadow:0 6px 24px rgba(0,0,0,.35);
+  opacity:0;pointer-events:none;
+  transition:opacity .2s,transform .2s;
+  transform:translateY(-4px);
+  z-index:9999;
+}
+.badge-tip:hover::after{opacity:1;transform:translateY(0);}
+/* unknown-warn */
 .unknown-warn{background:rgba(217,119,6,.08);border:1px solid rgba(217,119,6,.3);
   border-radius:8px;padding:.7rem 1rem;margin-bottom:.8rem;display:none;}
 .unknown-warn.show{display:block;}
@@ -576,10 +593,10 @@ nav{position:relative;z-index:10;background:var(--bg2);border-bottom:2px solid v
       </div>
       <button class="btn-signout" onclick="signOut()">Sign out</button>
       <div class="hdr-badges">
-      <span class="badge">Flask</span>
-      <span class="badge">Firebase</span>
-      <span class="badge q">VQE</span>
-      <span class="badge q">Neural Net</span>
+      <span class="badge badge-tip" data-tip="Flask (Python) — Lightweight web framework powering the REST API backend. Handles /api/analyze, /api/results, /api/mutate endpoints and serves the frontend.">Flask</span>
+      <span class="badge badge-tip" data-tip="Firebase — Google cloud platform used for Authentication (login/signup) and Firestore NoSQL database to store and retrieve per-user protein analysis results.">Firebase</span>
+      <span class="badge q badge-tip" data-tip="VQE (Variational Quantum Eigensolver) — Quantum algorithm that finds the minimum energy (ground state) of the protein Hamiltonian using a parameterized quantum circuit optimized by COBYLA. Runs on Qiskit Aer statevector simulator.">VQE</span>
+      <span class="badge q badge-tip" data-tip="Neural Net / Chou-Fasman AI — Sliding-window secondary structure prediction using Chou-Fasman propensity tables. Predicts Alpha Helix, Beta Sheet, Beta Turn and Random Coil regions from the amino acid sequence.">Neural Net</span>
     </div>
     </div>
   </div>
@@ -1428,21 +1445,24 @@ function drawEnergyLandscape(landscape){
   ctx.beginPath();
   landscape.forEach((p,i)=>{
     const x=pad+(W-2*pad)*i/(landscape.length-1);
-    const y=pad+(H-2*pad)*(1-(p.energy-minE)/(maxE-minE||1));
+    // Flipped: high energy = bottom, low energy = top (landscape dips down at minima)
+    const y=pad+(H-2*pad)*((p.energy-minE)/(maxE-minE||1));
     i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
   });
   ctx.strokeStyle='#7c3aed'; ctx.lineWidth=2; ctx.stroke();
   ctx.lineTo(W-pad,H-pad); ctx.lineTo(pad,H-pad); ctx.closePath();
   ctx.fillStyle='rgba(124,58,237,0.1)'; ctx.fill();
 
-  // Min marker
-  const minIdx = energies.indexOf(minE);
-  const mx=pad+(W-2*pad)*minIdx/(landscape.length-1);
-  const my=pad;
-  ctx.beginPath(); ctx.arc(mx,my,4,0,Math.PI*2);
+  // Min marker — now at BOTTOM since low energy maps to bottom
+  const minIdx2 = energies.indexOf(minE);
+  const mx2=pad+(W-2*pad)*minIdx2/(landscape.length-1);
+  const my2=H-pad;
+  ctx.beginPath(); ctx.arc(mx2,my2-4,4,0,Math.PI*2);
   ctx.fillStyle='#00ff9f'; ctx.fill();
   ctx.fillStyle='#00ff9f'; ctx.font='10px monospace'; ctx.textAlign='center';
-  ctx.fillText('E_min', mx, my-7);
+  ctx.fillText('E_min', mx2, my2-14);
+
+
 }
 
 // ─────────────────────────────────────────────
