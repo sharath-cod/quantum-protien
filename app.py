@@ -184,7 +184,7 @@ CF_PROPENSITY = {
 # Full table has 400 entries; this subset covers the major contributors.
 DIWV = {
     'WW': 1.0,  'WC': 1.0,  'WM': 24.68, 'WH': 24.68, 'WY': 1.0,
-    'WF': 1.0,  'WQ': 1.0,  'WR': 1.0,  'Wk': 1.0,
+    'WF': 1.0,  'WQ': 1.0,  'WR': 1.0,  'WK': 1.0,
     'CK': 1.0,  'CM': 1.0,  'CF': 1.0,  'CL': 1.0,  'CY': 1.0,
     'CR': 1.0,  'CS': 1.0,
     'YD': 24.68,'YE': 1.0,  'YN': 1.0,  'YS': 1.0,  'YT': 1.0,
@@ -1036,8 +1036,8 @@ def calculate_disease_risk(ai_result, quantum_result):
         healthy = KNOWN_HEALTHY_SEQUENCES[seq]
         classical = abs(quantum_result.get('hamiltonian_energy', 0))
         optimized = abs(quantum_result.get('minimum_energy', 0))
-        energy_improvement = round((optimized - classical) / max(classical, 0.001) * 100, 1) \
-                             if optimized > classical else 0.0
+        energy_improvement = round(abs(optimized - classical) / max(classical, 0.001) * 100, 1) \
+                             if classical != 0 else 0.0
         bullets = _build_bullets(ai_result, quantum_result, energy_improvement)
         return {
             'risk_score':         0,
@@ -1057,8 +1057,8 @@ def calculate_disease_risk(ai_result, quantum_result):
         known = KNOWN_DISEASE_SEQUENCES[seq]
         classical = abs(quantum_result.get('hamiltonian_energy', 0))
         optimized = abs(quantum_result.get('minimum_energy', 0))
-        energy_improvement = round((optimized - classical) / max(classical, 0.001) * 100, 1) \
-                             if optimized > classical else 0.0
+        energy_improvement = round(abs(optimized - classical) / max(classical, 0.001) * 100, 1) \
+                             if classical != 0 else 0.0
         bullets = _build_bullets(ai_result, quantum_result, energy_improvement)
         return {
             'risk_score':         known['risk_score'],
