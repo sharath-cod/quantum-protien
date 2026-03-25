@@ -1387,10 +1387,19 @@ def analyze():
     comparison = compare_with_reference(sequence, ai_result, quantum_result)
 
     # ── Quantum Energy Improvement ──
-    classical_e  = quantum_result.get('hamiltonian_energy', 0)
-    quantum_e    = quantum_result.get('minimum_energy', 0)
-    improvement  = round((abs(quantum_e) - abs(classical_e)) / max(abs(classical_e), 0.001) * 100, 1) \
-                   if abs(quantum_e) > abs(classical_e) else 0.0
+    # classical_e = raw Hamiltonian (nearest-neighbour sum)
+    # quantum_e   = VQE ground-state minimum (always ≤ classical_e)
+    # Improvement = how much lower (more negative) quantum went vs classical
+    classical_e = quantum_result.get('hamiltonian_energy', 0)
+    quantum_e   = quantum_result.get('minimum_energy', 0)
+    if classical_e != 0 and quantum_e < classical_e:
+        # quantum found a lower energy — positive improvement
+        improvement = round((classical_e - quantum_e) / max(abs(classical_e), 0.001) * 100, 1)
+    elif classical_e != 0 and quantum_e == classical_e:
+        improvement = 0.0
+    else:
+        # quantum_e >= classical_e (shouldn't happen, but handle gracefully)
+        improvement = round((classical_e - quantum_e) / max(abs(classical_e), 0.001) * 100, 1)
 
     # ── Custom/Known sequence detection ──
     is_known     = sequence.upper() in HEALTHY_REFERENCES
