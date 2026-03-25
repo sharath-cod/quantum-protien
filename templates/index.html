@@ -517,16 +517,16 @@ nav{position:relative;z-index:10;background:var(--bg2);border-bottom:2px solid v
 .badge-tip{position:relative;cursor:pointer;}
 .badge-tip::after{
   content:attr(data-tip);
-  position:absolute;top:calc(100% + 10px);right:0;
+  position:absolute;bottom:calc(100% + 10px);right:0;
   background:#0f2027;color:#cffafe;
   border:1px solid rgba(13,148,136,.5);border-radius:8px;
   padding:.6rem .9rem;font-size:.72rem;font-family:'Exo 2',sans-serif;
   letter-spacing:.5px;line-height:1.6;
-  width:260px;white-space:normal;
+  width:270px;white-space:normal;
   box-shadow:0 6px 24px rgba(0,0,0,.35);
   opacity:0;pointer-events:none;
   transition:opacity .2s,transform .2s;
-  transform:translateY(-4px);
+  transform:translateY(4px);
   z-index:9999;
 }
 .badge-tip:hover::after{opacity:1;transform:translateY(0);}
@@ -1274,7 +1274,10 @@ function renderResults(data){
   const quantE = qr.minimum_energy || 0;
   document.getElementById('qi-classical').textContent  = classE.toFixed(3) + ' eV';
   document.getElementById('qi-quantum').textContent    = quantE.toFixed(3) + ' eV';
-  document.getElementById('qi-improvement').textContent = imp > 0 ? '+' + imp + '%' : imp === 0 ? '—' : imp + '%';
+  const impEl = document.getElementById('qi-improvement');
+  if(imp > 0){ impEl.textContent = '+' + imp + '%'; impEl.style.color = 'var(--green)'; }
+  else if(imp < 0){ impEl.textContent = imp + '%'; impEl.style.color = 'var(--red)'; }
+  else { impEl.textContent = '0.0%'; impEl.style.color = 'var(--dim)'; }
   document.getElementById('backend-pill').textContent  = qr.quantum_backend || 'Qiskit Aer Simulator';
   // Circuit info
   const ci = qr.circuit_info;
