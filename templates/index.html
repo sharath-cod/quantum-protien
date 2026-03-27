@@ -28,7 +28,7 @@ body{background:var(--bg);color:var(--text);font-family:'Exo 2',sans-serif;min-h
 #particles{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;opacity:0.15;}
 
 /* HEADER */
-header{position:relative;z-index:500;
+header{position:relative;z-index:10;
   background:linear-gradient(135deg,#0f766e,#0d9488);
   box-shadow:0 2px 16px rgba(13,148,136,.2);
   border-bottom:3px solid var(--accent2);padding:1.2rem 2rem;}
@@ -513,190 +513,23 @@ nav{position:relative;z-index:10;background:var(--bg2);border-bottom:2px solid v
   color:rgba(255,255,255,.8);font-family:'Exo 2',sans-serif;font-size:.75rem;padding:.3rem .6rem;
   cursor:pointer;transition:all .2s;}
 .btn-signout:hover{border-color:#fca5a5;color:#fca5a5;}
-/* ===== MODERN FLOATING TOOLTIP ===== */
-.badge-tip{
-  position: relative;
-  cursor: pointer;
-  z-index: 300;
-}
-.stat-card{ cursor: pointer; }
-
-/* ── Global cursor-tracking tooltip ── */
-#cursor-tooltip{
-  position: fixed;
-  pointer-events: none;
-  z-index: 99999;
-  opacity: 0;
-  transition: opacity .22s ease, transform .22s ease;
-  transform: translateY(8px);
-  width: 310px;
-}
-#cursor-tooltip.visible{
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* Outer shell — matches site bg */
-#cursor-tooltip .ct-box{
-  background: linear-gradient(145deg, #e8f8f5 0%, #f0fafa 60%, #d4f1ee 100%);
-  border: 1.5px solid #0d9488;
-  border-radius: 14px;
-  overflow: hidden;
-  box-shadow: 0 16px 48px rgba(13,148,136,.22), 0 2px 8px rgba(13,148,136,.12);
-  position: relative;
-}
-
-/* Coloured accent bar at top */
-#cursor-tooltip .ct-bar{
-  height: 4px;
-  background: linear-gradient(90deg, #0d9488, #e05e3a, #0d9488);
-  background-size: 200% 100%;
-  animation: ctBarSlide 2.4s linear infinite;
-}
-@keyframes ctBarSlide{ to{ background-position: -200% 0; } }
-
-/* Header row */
-#cursor-tooltip .ct-head{
-  display: flex;
-  align-items: center;
-  gap: .5rem;
-  padding: .65rem 1rem .45rem;
-  border-bottom: 1px solid rgba(13,148,136,.18);
-}
-#cursor-tooltip .ct-icon{
-  font-size: 1.2rem;
-  line-height: 1;
-}
-#cursor-tooltip .ct-title{
-  font-family: 'Orbitron', monospace;
-  font-size: .68rem;
-  font-weight: 700;
-  letter-spacing: 1.5px;
-  color: #0d9488;
-  text-transform: uppercase;
-}
-
-/* Body */
-#cursor-tooltip .ct-body{
-  padding: .7rem 1rem .75rem;
-}
-#cursor-tooltip .ct-desc{
-  font-family: 'Exo 2', sans-serif;
-  font-size: .78rem;
-  color: #134e4a;
-  line-height: 1.65;
-  margin-bottom: .6rem;
-}
-
-/* Mini visual bar inside tooltip */
-#cursor-tooltip .ct-vis-wrap{
-  margin-top: .45rem;
-}
-#cursor-tooltip .ct-vis-label{
-  display: flex;
-  justify-content: space-between;
-  font-size: .68rem;
-  color: #4d7c78;
-  margin-bottom: 3px;
-  font-family: 'Exo 2', sans-serif;
-}
-#cursor-tooltip .ct-vis-track{
-  background: #b2d8d8;
-  border-radius: 99px;
-  height: 7px;
-  overflow: hidden;
-}
-#cursor-tooltip .ct-vis-fill{
-  height: 100%;
-  border-radius: 99px;
-  transition: width .5s ease;
-}
-
-/* Sparkline canvas */
-#cursor-tooltip .ct-spark{
-  width: 100%;
-  height: 44px;
-  margin-top: .45rem;
-  border-radius: 6px;
-  background: rgba(13,148,136,.06);
-  border: 1px solid rgba(13,148,136,.15);
-}
-
-/* Pill tags */
-#cursor-tooltip .ct-pills{
-  display: flex;
-  gap: .35rem;
-  flex-wrap: wrap;
-  margin-top: .55rem;
-}
-#cursor-tooltip .ct-pill{
-  font-size: .62rem;
-  font-family: 'Orbitron', monospace;
-  padding: .18rem .55rem;
-  border-radius: 999px;
-  border: 1px solid rgba(13,148,136,.4);
-  color: #0d9488;
-  background: rgba(13,148,136,.09);
-  letter-spacing: .5px;
-}
-#cursor-tooltip .ct-pill.warn{
-  border-color: rgba(224,94,58,.4);
-  color: #c04020;
-  background: rgba(224,94,58,.09);
-}
-#cursor-tooltip .ct-pill.ok{
-  border-color: rgba(5,150,105,.4);
-  color: #047857;
-  background: rgba(5,150,105,.09);
-}
-
-/* Value highlight */
-#cursor-tooltip .ct-val-row{
-  display: flex;
-  align-items: baseline;
-  gap: .35rem;
-  margin-bottom: .25rem;
-}
-#cursor-tooltip .ct-val{
-  font-family: 'Orbitron', monospace;
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: #0d9488;
-}
-#cursor-tooltip .ct-unit{
-  font-size: .7rem;
-  color: #4d7c78;
-}
-
-/* Arrow */
-#cursor-tooltip .ct-arrow{
-  width: 0; height: 0;
-  border-left: 9px solid transparent;
-  border-right: 9px solid transparent;
-  border-top: 9px solid #0d9488;
-  position: absolute;
-  bottom: -9px;
-  left: 50%;
-  transform: translateX(-50%);
-  filter: drop-shadow(0 2px 3px rgba(13,148,136,.2));
-}
-/* STAT CARD TOOLTIP — same style but anchored below the card */
-.stat-tip{position:relative;cursor:help;}
-.stat-tip::after{
+/* BADGE TOOLTIP */
+.badge-tip{position:relative;cursor:pointer;}
+.badge-tip::after{
   content:attr(data-tip);
-  position:absolute;top:calc(100% + 10px);left:50%;
-  transform:translateX(-50%) translateY(-4px);
+  position:absolute;top:calc(100% + 10px);right:0;
   background:#0f2027;color:#cffafe;
   border:1px solid rgba(13,148,136,.5);border-radius:8px;
   padding:.6rem .9rem;font-size:.72rem;font-family:'Exo 2',sans-serif;
   letter-spacing:.5px;line-height:1.6;
-  width:230px;white-space:normal;
+  width:260px;white-space:normal;
   box-shadow:0 6px 24px rgba(0,0,0,.35);
   opacity:0;pointer-events:none;
   transition:opacity .2s,transform .2s;
+  transform:translateY(-4px);
   z-index:9999;
 }
-.stat-tip:hover::after{opacity:1;transform:translateX(-50%) translateY(0);}
+.badge-tip:hover::after{opacity:1;transform:translateY(0);}
 /* unknown-warn */
 .unknown-warn{background:rgba(217,119,6,.08);border:1px solid rgba(217,119,6,.3);
   border-radius:8px;padding:.7rem 1rem;margin-bottom:.8rem;display:none;}
@@ -704,6 +537,89 @@ nav{position:relative;z-index:10;background:var(--bg2);border-bottom:2px solid v
 .unknown-warn-title{font-size:.72rem;color:var(--yellow);font-weight:700;letter-spacing:1px;
   text-transform:uppercase;margin-bottom:.3rem;}
 .unknown-warn-body{font-size:.72rem;color:var(--dim);line-height:1.6;}
+
+/* ─── INVALID SEQUENCE ERROR MODAL ─── */
+#invalid-modal{
+  position:fixed;inset:0;background:rgba(10,20,20,0.82);z-index:3000;
+  display:none;align-items:center;justify-content:center;
+  backdrop-filter:blur(4px);
+}
+#invalid-modal.show{display:flex;}
+.inv-card{
+  background:linear-gradient(145deg,#0f1f1f,#1a0a0a);
+  border:2px solid var(--red);border-radius:18px;
+  padding:2rem 2.2rem;max-width:520px;width:92vw;
+  box-shadow:0 0 40px rgba(220,38,38,.35),0 0 80px rgba(220,38,38,.12);
+  animation:invPop .3s cubic-bezier(.34,1.56,.64,1);
+  position:relative;
+}
+@keyframes invPop{from{transform:scale(.8);opacity:0;}to{transform:scale(1);opacity:1;}}
+.inv-icon{font-size:3rem;text-align:center;display:block;margin-bottom:.5rem;
+  animation:invShake .5s ease .1s;}
+@keyframes invShake{
+  0%,100%{transform:translateX(0);}
+  20%{transform:translateX(-6px);}
+  40%{transform:translateX(6px);}
+  60%{transform:translateX(-4px);}
+  80%{transform:translateX(4px);}
+}
+.inv-title{
+  font-family:'Orbitron',monospace;font-size:1.1rem;font-weight:900;
+  color:#ff4444;text-align:center;letter-spacing:2px;
+  margin-bottom:.4rem;text-transform:uppercase;
+}
+.inv-subtitle{
+  text-align:center;font-size:.8rem;color:rgba(255,100,100,.75);
+  letter-spacing:1.5px;margin-bottom:1.2rem;
+}
+.inv-section{margin-bottom:1rem;}
+.inv-label{font-size:.7rem;color:rgba(255,200,200,.6);letter-spacing:1.5px;
+  text-transform:uppercase;margin-bottom:.35rem;}
+.inv-invalid-chars{display:flex;flex-wrap:wrap;gap:.4rem;}
+.inv-char-badge{
+  background:rgba(220,38,38,.2);border:1px solid rgba(220,38,38,.5);
+  color:#ff8080;font-family:monospace;font-size:.95rem;font-weight:700;
+  padding:.2rem .6rem;border-radius:6px;letter-spacing:1px;
+}
+.inv-valid-grid{display:flex;flex-wrap:wrap;gap:.3rem;}
+.inv-valid-aa{
+  background:rgba(13,148,136,.15);border:1px solid rgba(13,148,136,.35);
+  color:#5eead4;font-family:monospace;font-size:.75rem;font-weight:700;
+  padding:.15rem .45rem;border-radius:5px;
+}
+.inv-examples{display:flex;flex-direction:column;gap:.4rem;}
+.inv-ex-row{
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);
+  border-radius:8px;padding:.45rem .7rem;cursor:pointer;transition:all .2s;
+}
+.inv-ex-row:hover{border-color:var(--accent);background:rgba(13,148,136,.1);}
+.inv-ex-name{font-size:.7rem;color:rgba(200,255,240,.6);letter-spacing:1px;margin-bottom:2px;}
+.inv-ex-seq{font-family:monospace;font-size:.78rem;color:#5eead4;word-break:break-all;}
+.inv-close{
+  width:100%;margin-top:1.2rem;
+  background:linear-gradient(135deg,#7f1d1d,#dc2626);
+  border:none;color:white;padding:.75rem;border-radius:10px;
+  font-family:'Orbitron',monospace;font-size:.8rem;letter-spacing:2px;
+  cursor:pointer;font-weight:700;transition:all .2s;
+}
+.inv-close:hover{opacity:.85;transform:translateY(-1px);}
+.inv-dismiss{
+  width:100%;margin-top:.5rem;
+  background:transparent;border:1px solid rgba(255,255,255,.15);
+  color:rgba(255,255,255,.5);padding:.5rem;border-radius:8px;
+  font-family:'Exo 2',sans-serif;font-size:.8rem;cursor:pointer;transition:all .2s;
+}
+.inv-dismiss:hover{border-color:rgba(255,255,255,.35);color:rgba(255,255,255,.75);}
+/* live input highlight for bad chars */
+.seq-input.invalid-flash{
+  border-color:var(--red)!important;
+  box-shadow:0 0 0 3px rgba(220,38,38,.2)!important;
+  animation:flashBorder .6s ease;
+}
+@keyframes flashBorder{
+  0%,100%{box-shadow:0 0 0 3px rgba(220,38,38,.2);}
+  50%{box-shadow:0 0 0 6px rgba(220,38,38,.4);}
+}
 </style>
 </head>
 <body>
@@ -734,6 +650,47 @@ nav{position:relative;z-index:10;background:var(--bg2);border-bottom:2px solid v
 </div>
 
 <!-- Particle canvas background -->
+
+<!-- ══ INVALID SEQUENCE MODAL ══ -->
+<div id="invalid-modal">
+  <div class="inv-card">
+    <span class="inv-icon">🧬❌</span>
+    <div class="inv-title">Invalid Amino Acid Sequence</div>
+    <div class="inv-subtitle">Please provide a valid protein sequence</div>
+
+    <div class="inv-section" id="inv-bad-section">
+      <div class="inv-label">🚫 Invalid Characters Detected</div>
+      <div class="inv-invalid-chars" id="inv-bad-chars"></div>
+    </div>
+
+    <div class="inv-section">
+      <div class="inv-label">✅ Valid Amino Acid Codes (20 Standard)</div>
+      <div class="inv-valid-grid" id="inv-valid-grid"></div>
+    </div>
+
+    <div class="inv-section">
+      <div class="inv-label">💡 Try One of These Valid Examples</div>
+      <div class="inv-examples">
+        <div class="inv-ex-row" onclick="loadInvExample('GIVEQCCTSICSLYQLENYCN','Insulin A-chain')">
+          <div class="inv-ex-name">Insulin A-chain</div>
+          <div class="inv-ex-seq">GIVEQCCTSICSLYQLENYCN</div>
+        </div>
+        <div class="inv-ex-row" onclick="loadInvExample('DAEFRHDSGYEVHHQKLVFFAEDVGSNKGAIIGLMVGGVVIA','Beta Amyloid')">
+          <div class="inv-ex-name">Beta Amyloid (Alzheimer's)</div>
+          <div class="inv-ex-seq">DAEFRHDSGYEVHHQKLVFFAEDVGSNKGAIIGLMVGGVVIA</div>
+        </div>
+        <div class="inv-ex-row" onclick="loadInvExample('AELMAELMAELMAELM','Pure Alpha Helix')">
+          <div class="inv-ex-name">Pure Alpha Helix Demo</div>
+          <div class="inv-ex-seq">AELMAELMAELMAELM</div>
+        </div>
+      </div>
+    </div>
+
+    <button class="inv-close" onclick="closeInvalidModal()">✏️ CORRECT MY SEQUENCE</button>
+    <button class="inv-dismiss" onclick="closeInvalidModal()">Dismiss</button>
+  </div>
+</div>
+
 <canvas id="particles"></canvas>
 
 <!-- LOADING -->
@@ -1306,7 +1263,22 @@ async function analyze(){
   const errBox = document.getElementById('error-box');
 
   errBox.style.display = 'none';
-  if(!seq){ showError('Please enter a protein sequence'); return; }
+
+  // ── Frontend pre-validation ──
+  if(!seq){ showError('⚠️ Please enter a protein sequence before analyzing.'); return; }
+
+  const VALID_AA = new Set(['A','C','D','E','F','G','H','I','K','L','M','N','P','Q','R','S','T','V','W','Y']);
+  const cleanedSeq = seq.replace(/[\-\s\d]/g,'');
+  const badChars = [...new Set([...cleanedSeq].filter(c => !VALID_AA.has(c)))];
+  if(badChars.length > 0){
+    showInvalidModal(badChars);
+    document.getElementById('seq-input').classList.add('invalid-flash');
+    setTimeout(()=>document.getElementById('seq-input').classList.remove('invalid-flash'),1500);
+    return;
+  }
+  if(cleanedSeq.length < 3){
+    showError('⚠️ Sequence too short! Please enter at least 3 amino acid residues.'); return;
+  }
 
   // Show loading with steps
   showLoading(true);
@@ -1329,7 +1301,16 @@ async function analyze(){
     clearInterval(stepInterval);
     showLoading(false);
 
-    if(!res.ok){ showError(data.error || 'Analysis failed'); return; }
+    if(!res.ok){
+      if(data.validation_failed && data.invalid_chars){
+        showInvalidModal(data.invalid_chars);
+        document.getElementById('seq-input').classList.add('invalid-flash');
+        setTimeout(()=>document.getElementById('seq-input').classList.remove('invalid-flash'),1500);
+      } else {
+        showError(data.error || 'Analysis failed');
+      }
+      return;
+    }
 
     // Show unknown input warning if any substitutions/skips occurred
     const notes = data.ai_result?.input_notes;
@@ -1426,99 +1407,14 @@ function renderResults(data){
   document.getElementById('res-conf').textContent      = fn.confidence.toFixed(1) + '%';
   document.getElementById('res-qubits').textContent    = qr.num_qubits;
 
-  // Stat cards with rich tooltip data
-  const aaLen    = ai.length;
-  const molWt    = ai.molecular_weight;
-  const hydroPct = ai.hydrophobic_ratio;
-  const isoEl    = ai.isoelectric_point;
-  const instIdx  = ai.instability_index;
-  const vqeIter  = qr.total_iterations;
-
+  // Stat cards
   document.getElementById('stat-cards').innerHTML = `
-    <div class="stat-card stat-card-tip"
-      data-tip-title="Amino Acids"
-      data-tip-icon="🔬"
-      data-tip-val="${aaLen}"
-      data-tip-unit="residues"
-      data-tip-desc="Total number of amino acid residues in the sequence. Proteins &lt;100 aa are peptides; 100–300 mid-size; 300+ large."
-      data-tip-bar="${Math.min(aaLen/600*100,100).toFixed(1)}"
-      data-tip-bar-lo="0" data-tip-bar-hi="600+"
-      data-tip-color="#0d9488"
-      data-tip-pills="${aaLen < 100 ? 'Peptide' : aaLen < 300 ? 'Mid-size' : 'Large protein'},Polypeptide chain"
-      data-tip-pill-state="${aaLen < 100 ? 'ok' : aaLen < 300 ? '' : 'warn'}"
-      data-tip-spark="aa">
-      <div class="sv">${aaLen}</div><div class="sl">Amino Acids</div>
-    </div>
-    <div class="stat-card stat-card-tip"
-      data-tip-title="Molecular Weight"
-      data-tip-icon="⚖️"
-      data-tip-val="${molWt.toLocaleString()}"
-      data-tip-unit="Da"
-      data-tip-desc="Molecular mass in Daltons. Average amino acid ≈ 110 Da. Used for gel electrophoresis sizing and crystallography."
-      data-tip-bar="${Math.min(molWt/100000*100,100).toFixed(1)}"
-      data-tip-bar-lo="0 Da" data-tip-bar-hi="100 kDa"
-      data-tip-color="#e05e3a"
-      data-tip-pills="${molWt < 10000 ? 'Micro' : molWt < 50000 ? 'Standard' : 'Heavy'},${(molWt/1000).toFixed(1)} kDa"
-      data-tip-pill-state="${molWt < 10000 ? 'ok' : molWt < 50000 ? '' : 'warn'}"
-      data-tip-spark="mw">
-      <div class="sv">${molWt.toLocaleString()}</div><div class="sl">Mol. Weight (Da)</div>
-    </div>
-    <div class="stat-card stat-card-tip"
-      data-tip-title="Hydrophobicity"
-      data-tip-icon="💧"
-      data-tip-val="${hydroPct}"
-      data-tip-unit="%"
-      data-tip-desc="Fraction of hydrophobic residues (A,C,F,I,L,M,V,W,Y). High % → membrane proteins or hydrophobic core formation."
-      data-tip-bar="${hydroPct}"
-      data-tip-bar-lo="0%" data-tip-bar-hi="100%"
-      data-tip-color="${hydroPct > 50 ? '#e05e3a' : '#0d9488'}"
-      data-tip-pills="${hydroPct > 60 ? 'Membrane-like' : hydroPct > 40 ? 'Mixed' : 'Hydrophilic'},${hydroPct > 50 ? 'High hydrophobicity' : 'Moderate'}"
-      data-tip-pill-state="${hydroPct > 60 ? 'warn' : 'ok'}"
-      data-tip-spark="hydro">
-      <div class="sv">${hydroPct}%</div><div class="sl">Hydrophobic</div>
-    </div>
-    <div class="stat-card stat-card-tip"
-      data-tip-title="Isoelectric Point"
-      data-tip-icon="⚡"
-      data-tip-val="${isoEl}"
-      data-tip-unit="pH"
-      data-tip-desc="pH at which the protein carries zero net charge. Below pI → positively charged. Above pI → negatively charged. Critical for purification."
-      data-tip-bar="${(isoEl/14*100).toFixed(1)}"
-      data-tip-bar-lo="pH 0" data-tip-bar-hi="pH 14"
-      data-tip-color="#7c3aed"
-      data-tip-pills="${isoEl < 6 ? 'Acidic' : isoEl > 8 ? 'Basic' : 'Neutral'},pI ${isoEl}"
-      data-tip-pill-state="${isoEl < 6 ? 'ok' : isoEl > 8 ? 'warn' : ''}"
-      data-tip-spark="pi">
-      <div class="sv">${isoEl}</div><div class="sl">Isoelectric Point</div>
-    </div>
-    <div class="stat-card stat-card-tip"
-      data-tip-title="Instability Index"
-      data-tip-icon="🌡️"
-      data-tip-val="${instIdx}"
-      data-tip-unit="II"
-      data-tip-desc="Predicts protein stability in vitro (Guruprasad, 1990). II &lt; 40 = stable; II ≥ 40 = unstable. Higher values = shorter half-life."
-      data-tip-bar="${Math.min(instIdx/100*100,100).toFixed(1)}"
-      data-tip-bar-lo="Stable 0" data-tip-bar-hi="100 Unstable"
-      data-tip-color="${instIdx >= 40 ? '#dc2626' : '#059669'}"
-      data-tip-pills="${instIdx < 40 ? 'Stable' : 'Unstable'},II = ${instIdx}"
-      data-tip-pill-state="${instIdx < 40 ? 'ok' : 'warn'}"
-      data-tip-spark="inst">
-      <div class="sv">${instIdx}</div><div class="sl">Instability Index</div>
-    </div>
-    <div class="stat-card stat-card-tip"
-      data-tip-title="VQE Iterations"
-      data-tip-icon="⚛"
-      data-tip-val="${vqeIter}"
-      data-tip-unit="steps"
-      data-tip-desc="Variational Quantum Eigensolver convergence steps. Each iteration refines quantum circuit parameters toward the ground-state energy minimum."
-      data-tip-bar="${Math.min(vqeIter/200*100,100).toFixed(1)}"
-      data-tip-bar-lo="0" data-tip-bar-hi="200 steps"
-      data-tip-color="#0d9488"
-      data-tip-pills="${vqeIter < 80 ? 'Fast converge' : vqeIter < 150 ? 'Normal' : 'Slow converge'},VQE"
-      data-tip-pill-state="${vqeIter < 80 ? 'ok' : vqeIter < 150 ? '' : 'warn'}"
-      data-tip-spark="vqe">
-      <div class="sv">${vqeIter}</div><div class="sl">VQE Iterations</div>
-    </div>
+    <div class="stat-card"><div class="sv">${ai.length}</div><div class="sl">Amino Acids</div></div>
+    <div class="stat-card"><div class="sv">${ai.molecular_weight.toLocaleString()}</div><div class="sl">Mol. Weight (Da)</div></div>
+    <div class="stat-card"><div class="sv">${ai.hydrophobic_ratio}%</div><div class="sl">Hydrophobic</div></div>
+    <div class="stat-card"><div class="sv">${ai.isoelectric_point}</div><div class="sl">Isoelectric Point</div></div>
+    <div class="stat-card"><div class="sv">${ai.instability_index}</div><div class="sl">Instability Index</div></div>
+    <div class="stat-card"><div class="sv">${qr.total_iterations}</div><div class="sl">VQE Iterations</div></div>
   `;
 
   // ── ④ QUANTUM ENERGY IMPROVEMENT ──
@@ -1526,10 +1422,7 @@ function renderResults(data){
   const quantE = qr.minimum_energy || 0;
   document.getElementById('qi-classical').textContent  = classE.toFixed(3) + ' eV';
   document.getElementById('qi-quantum').textContent    = quantE.toFixed(3) + ' eV';
-  const impEl = document.getElementById('qi-improvement');
-  if(imp > 0){ impEl.textContent = '+' + imp + '%'; impEl.style.color = 'var(--green)'; }
-  else if(imp < 0){ impEl.textContent = imp + '%'; impEl.style.color = 'var(--red)'; }
-  else { impEl.textContent = '0.0%'; impEl.style.color = 'var(--dim)'; }
+  document.getElementById('qi-improvement').textContent = imp > 0 ? '+' + imp + '%' : imp === 0 ? '—' : imp + '%';
   document.getElementById('backend-pill').textContent  = qr.quantum_backend || 'Qiskit Aer Simulator';
   // Circuit info
   const ci = qr.circuit_info;
@@ -2080,218 +1973,50 @@ function switchTab(name){
 }
 
 // ─────────────────────────────────────────────
-// CURSOR-TRACKING TOOLTIP  (badge-tip + stat-card-tip)
-// ─────────────────────────────────────────────
-(function(){
-  /* ── build DOM ── */
-  const tip = document.createElement('div');
-  tip.id = 'cursor-tooltip';
-  tip.innerHTML = `
-    <div class="ct-box">
-      <div class="ct-bar"></div>
-      <div class="ct-head">
-        <span class="ct-icon">🔬</span>
-        <span class="ct-title">Info</span>
-      </div>
-      <div class="ct-body">
-        <div class="ct-val-row" style="display:none">
-          <span class="ct-val"></span>
-          <span class="ct-unit"></span>
-        </div>
-        <div class="ct-desc"></div>
-        <div class="ct-vis-wrap" style="display:none">
-          <div class="ct-vis-label">
-            <span class="ct-vis-lo"></span>
-            <span class="ct-vis-hi"></span>
-          </div>
-          <div class="ct-vis-track">
-            <div class="ct-vis-fill"></div>
-          </div>
-        </div>
-        <canvas class="ct-spark" style="display:none" width="270" height="44"></canvas>
-        <div class="ct-pills"></div>
-      </div>
-    </div>
-    <div class="ct-arrow"></div>
-  `;
-  document.body.appendChild(tip);
-
-  const TIP_W   = 310;
-  const OFFSET_Y = 16;
-  let currentTarget = null;
-
-  /* ── sparkline patterns per card type ── */
-  const SPARKS = {
-    aa:    () => Array.from({length:20},(_,i)=> 0.3 + 0.5*Math.sin(i*0.6)+0.2*Math.random()),
-    mw:    () => Array.from({length:20},(_,i)=> Math.pow(i/19,1.8)+0.05*Math.random()),
-    hydro: () => Array.from({length:20},(_,i)=> 0.5+0.4*Math.cos(i*0.7)+0.1*Math.random()),
-    pi:    () => Array.from({length:20},(_,i)=> 0.1+0.8*Math.abs(Math.sin(i*0.5))+0.05*Math.random()),
-    inst:  () => Array.from({length:20},(_,i)=> 0.9-0.7*(i/19)+0.08*Math.random()),
-    vqe:   () => Array.from({length:20},(_,i)=> Math.max(0.05, 0.95*Math.exp(-i*0.18)+0.06*Math.random())),
-  };
-
-  function drawSparkline(canvas, type, color){
-    const ctx = canvas.getContext('2d');
-    const W = canvas.width, H = canvas.height;
-    ctx.clearRect(0,0,W,H);
-    const pts = (SPARKS[type] || SPARKS.aa)();
-    const minV = Math.min(...pts), maxV = Math.max(...pts);
-    const norm = v => H - ((v - minV)/(maxV - minV + 0.001))*(H-8) - 4;
-
-    /* fill */
-    const grad = ctx.createLinearGradient(0,0,0,H);
-    grad.addColorStop(0, color + '55');
-    grad.addColorStop(1, color + '08');
-    ctx.beginPath();
-    ctx.moveTo(0, norm(pts[0]));
-    pts.forEach((v,i)=> ctx.lineTo(i*(W/(pts.length-1)), norm(v)));
-    ctx.lineTo(W, H); ctx.lineTo(0, H); ctx.closePath();
-    ctx.fillStyle = grad;
-    ctx.fill();
-
-    /* line */
-    ctx.beginPath();
-    ctx.moveTo(0, norm(pts[0]));
-    pts.forEach((v,i)=> ctx.lineTo(i*(W/(pts.length-1)), norm(v)));
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 2;
-    ctx.lineJoin = 'round';
-    ctx.stroke();
-
-    /* last dot */
-    const lx = W, ly = norm(pts[pts.length-1]);
-    ctx.beginPath(); ctx.arc(lx-2, ly, 3.5, 0, Math.PI*2);
-    ctx.fillStyle = color; ctx.fill();
-  }
-
-  /* ── position the tooltip above the cursor ── */
-  function positionTip(x, y){
-    const vw = window.innerWidth;
-    const tipH = tip.offsetHeight || 140;
-
-    let left = x - TIP_W / 2;
-    if(left < 8) left = 8;
-    if(left + TIP_W > vw - 8) left = vw - TIP_W - 8;
-
-    let top = y - tipH - OFFSET_Y;
-    if(top < 8) top = y + 24;
-
-    tip.style.left = left + 'px';
-    tip.style.top  = top  + 'px';
-
-    /* arrow tracks cursor X */
-    const arrowEl = tip.querySelector('.ct-arrow');
-    const relX    = Math.max(16, Math.min(TIP_W - 16, x - left));
-    arrowEl.style.left = relX + 'px';
-    arrowEl.style.transform = 'translateX(-50%)';
-    /* hide arrow when flipped below */
-    arrowEl.style.display = (top > y) ? 'none' : '';
-  }
-
-  /* ── populate tooltip for stat-card-tip ── */
-  function showStatCard(el){
-    const d = el.dataset;
-    const color = d.tipColor || '#0d9488';
-
-    tip.querySelector('.ct-icon').textContent  = d.tipIcon  || '📊';
-    tip.querySelector('.ct-title').textContent = d.tipTitle || 'Metric';
-    tip.querySelector('.ct-desc').textContent  = d.tipDesc  || '';
-
-    /* value row */
-    const vRow = tip.querySelector('.ct-val-row');
-    if(d.tipVal){
-      vRow.style.display = 'flex';
-      tip.querySelector('.ct-val').textContent  = d.tipVal;
-      tip.querySelector('.ct-unit').textContent = d.tipUnit || '';
-      tip.querySelector('.ct-val').style.color  = color;
-    } else { vRow.style.display = 'none'; }
-
-    /* bar */
-    const visWrap = tip.querySelector('.ct-vis-wrap');
-    if(d.tipBar !== undefined){
-      visWrap.style.display = 'block';
-      tip.querySelector('.ct-vis-lo').textContent   = d.tipBarLo || '0';
-      tip.querySelector('.ct-vis-hi').textContent   = d.tipBarHi || '100';
-      const fill = tip.querySelector('.ct-vis-fill');
-      fill.style.width      = Math.min(parseFloat(d.tipBar),100) + '%';
-      fill.style.background = `linear-gradient(90deg, ${color}88, ${color})`;
-    } else { visWrap.style.display = 'none'; }
-
-    /* sparkline */
-    const sparkType = d.tipSpark;
-    const sparkEl = tip.querySelector('.ct-spark');
-    if(sparkType){
-      sparkEl.style.display = 'block';
-      requestAnimationFrame(() => drawSparkline(sparkEl, sparkType, color));
-    } else { sparkEl.style.display = 'none'; }
-
-    /* pills */
-    const pillsEl = tip.querySelector('.ct-pills');
-    const pills   = (d.tipPills || '').split(',').filter(Boolean);
-    const states  = (d.tipPillState || '').split(',');
-    pillsEl.innerHTML = pills.map((p,i)=>
-      `<span class="ct-pill ${states[i]||''}">${p.trim()}</span>`
-    ).join('');
-
-    /* accent bar color */
-    tip.querySelector('.ct-bar').style.background =
-      `linear-gradient(90deg,${color},#e05e3a,${color})`;
-  }
-
-  /* ── populate tooltip for badge-tip ── */
-  function showBadge(el){
-    tip.querySelector('.ct-icon').textContent  = '🏷️';
-    tip.querySelector('.ct-title').textContent = 'Info';
-    tip.querySelector('.ct-desc').textContent  = el.dataset.tip || '';
-    tip.querySelector('.ct-val-row').style.display  = 'none';
-    tip.querySelector('.ct-vis-wrap').style.display = 'none';
-    tip.querySelector('.ct-spark').style.display    = 'none';
-    tip.querySelector('.ct-pills').innerHTML        = '';
-    tip.querySelector('.ct-bar').style.background   =
-      'linear-gradient(90deg,#0d9488,#e05e3a,#0d9488)';
-  }
-
-  /* ── events ── */
-  document.addEventListener('mousemove', function(e){
-    if(!currentTarget) return;
-    positionTip(e.clientX, e.clientY);
-  });
-
-  document.addEventListener('mouseover', function(e){
-    const statEl  = e.target.closest('.stat-card-tip');
-    const badgeEl = e.target.closest('.badge-tip');
-    if(statEl){
-      currentTarget = statEl;
-      showStatCard(statEl);
-      tip.classList.add('visible');
-    } else if(badgeEl && badgeEl.dataset.tip){
-      currentTarget = badgeEl;
-      showBadge(badgeEl);
-      tip.classList.add('visible');
-    }
-  });
-
-  document.addEventListener('mouseout', function(e){
-    const left = e.relatedTarget;
-    if(currentTarget && (!left || (!currentTarget.contains(left)))){
-      const stillOn = left && (left.closest('.stat-card-tip') || left.closest('.badge-tip'));
-      if(!stillOn){
-        currentTarget = null;
-        tip.classList.remove('visible');
-      }
-    }
-  });
-})();
-
-// ─────────────────────────────────────────────
 // HELPERS
 // ─────────────────────────────────────────────
 function showError(msg){
   const box=document.getElementById('error-box');
   box.style.display='block';
-  box.textContent='⚠️ '+msg;
+  box.innerHTML='⚠️ '+msg.replace(/\n/g,'<br>');
   setPipeline(1);
+  box.scrollIntoView({behavior:'smooth',block:'nearest'});
 }
+
+// ─── INVALID SEQUENCE MODAL ───
+const VALID_AA_LIST = ['A','C','D','E','F','G','H','I','K','L','M','N','P','Q','R','S','T','V','W','Y'];
+
+function showInvalidModal(badChars){
+  // Populate bad chars
+  const badEl = document.getElementById('inv-bad-chars');
+  badEl.innerHTML = badChars.map(c=>`<span class="inv-char-badge">${c}</span>`).join('');
+  document.getElementById('inv-bad-section').style.display = badChars.length ? 'block' : 'none';
+
+  // Populate valid AA grid
+  const validEl = document.getElementById('inv-valid-grid');
+  validEl.innerHTML = VALID_AA_LIST.map(aa=>`<span class="inv-valid-aa">${aa}</span>`).join('');
+
+  document.getElementById('invalid-modal').classList.add('show');
+}
+
+function closeInvalidModal(){
+  document.getElementById('invalid-modal').classList.remove('show');
+  // Focus the input so user can fix it
+  setTimeout(()=>{ document.getElementById('seq-input').focus(); }, 200);
+}
+
+function loadInvExample(seq, name){
+  document.getElementById('seq-input').value = seq;
+  document.getElementById('protein-name').value = name;
+  updateSeqStats();
+  closeInvalidModal();
+  toast('💡 Example loaded! Click Analyze to run.');
+}
+
+// Close modal on backdrop click
+document.getElementById('invalid-modal').addEventListener('click', function(e){
+  if(e.target === this) closeInvalidModal();
+});
 function showLoading(show){
   document.getElementById('loading').className=show?'show':'';
   document.getElementById('btn-analyze').disabled=show;
