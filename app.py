@@ -1430,23 +1430,62 @@ def analyze():
     }
 
     # ── Save to Firestore ──
+    # Strip heavy / non-serializable fields before saving to avoid:
+    #   • Firestore 1 MB document limit (aa_breakdown & coords_3d can be huge)
+    #   • numpy float serialization errors
+    def _safe_ai(a):
+        return {
+            'length':            a['length'],
+            'hydrophobic_ratio': a['hydrophobic_ratio'],
+            'charge_ratio':      a['charge_ratio'],
+            'positive_charged':  a['positive_charged'],
+            'negative_charged':  a['negative_charged'],
+            'dominant_structure':a['dominant_structure'],
+            'confidence_scores': a['confidence_scores'],
+            'molecular_weight':  a['molecular_weight'],
+            'isoelectric_point': a['isoelectric_point'],
+            'instability_index': a['instability_index'],
+            'is_stable':         a['is_stable'],
+            'valid_sequence':    a['valid_sequence'],
+            'input_notes':       a.get('input_notes', {}),
+        }
+
+    def _safe_qr(q):
+        return {
+            'num_qubits':             q['num_qubits'],
+            'hamiltonian_energy':     q['hamiltonian_energy'],
+            'minimum_energy':         q['minimum_energy'],
+            'total_iterations':       q['total_iterations'],
+            'best_quantum_state':     q['best_quantum_state'],
+            'predicted_fold_topology':q['predicted_fold_topology'],
+            'convergence_achieved':   q['convergence_achieved'],
+            'quantum_backend':        q.get('quantum_backend', ''),
+            'circuit_info':           q.get('circuit_info'),
+            # Keep only last 30 VQE iterations (not all 200+)
+            'vqe_iterations':         q.get('vqe_iterations', [])[-30:],
+        }
+
     doc_ref = db.collection(COLLECTION).document()
-    doc_ref.set({
-        'uid':            uid,
-        'name':           name,
-        'sequence':       sequence,
-        'original_input': raw_sequence,
-        'length':         ai_result['length'],
-        'ai_result':      ai_result,
-        'quantum_result': quantum_result,
-        'final_structure':final,
-        'disease_risk':   disease_risk,
-        'comparison':     comparison,
-        'energy':         quantum_result['minimum_energy'],
-        'has_unknowns':   ai_result['input_notes']['has_unknowns'],
-        'sequence_tag':   sequence_tag,
-        'created_at':     firestore.SERVER_TIMESTAMP,
-    })
+    try:
+        doc_ref.set({
+            'uid':            uid,
+            'name':           name,
+            'sequence':       sequence,
+            'original_input': raw_sequence,
+            'length':         ai_result['length'],
+            'ai_result':      _safe_ai(ai_result),
+            'quantum_result': _safe_qr(quantum_result),
+            'final_structure':final,
+            'disease_risk':   disease_risk,
+            'comparison':     comparison,
+            'energy':         float(quantum_result['minimum_energy']),
+            'has_unknowns':   ai_result['input_notes']['has_unknowns'],
+            'sequence_tag':   sequence_tag,
+            'created_at':     firestore.SERVER_TIMESTAMP,
+        })
+    except Exception as fs_err:
+        # Log but don't fail the request — analysis result still returned to user
+        print(f"⚠️  Firestore save error: {fs_err}")
 
     return jsonify({
         'success':        True,
@@ -1468,25 +1507,52 @@ def get_results():
     if not decoded:
         return jsonify({'error': 'Unauthorized'}), 401
 
-    uid  = decoded['uid']
-    docs = (db.collection(COLLECTION)
-              .where('uid', '==', uid)
-              .order_by('created_at', direction=firestore.Query.DESCENDING)
-              .stream())
-
+    uid = decoded['uid']
     out = []
-    for doc in docs:
-        d = doc.to_dict()
-        out.append({
-            'id':         doc.id,
-            'name':       d.get('name'),
-            'sequence':   d.get('sequence'),
-            'length':     d.get('length'),
-            'energy':     d.get('energy'),
-            'final':      d.get('final_structure', {}),
-            'has_unknowns': d.get('has_unknowns', False),
-            'created_at': str(d.get('created_at')),
-        })
+
+    try:
+        # Try ordered query first (requires Firestore composite index)
+        docs = (db.collection(COLLECTION)
+                  .where('uid', '==', uid)
+                  .order_by('created_at', direction=firestore.Query.DESCENDING)
+                  .stream())
+        for doc in docs:
+            d = doc.to_dict()
+            out.append({
+                'id':           doc.id,
+                'name':         d.get('name'),
+                'sequence':     d.get('sequence'),
+                'length':       d.get('length'),
+                'energy':       d.get('energy'),
+                'final':        d.get('final_structure', {}),
+                'has_unknowns': d.get('has_unknowns', False),
+                'created_at':   str(d.get('created_at')),
+            })
+    except Exception as order_err:
+        print(f"⚠️  Ordered query failed ({order_err}), falling back to unordered query")
+        try:
+            # Fallback: unordered query (no index needed) — sort in Python
+            docs = (db.collection(COLLECTION)
+                      .where('uid', '==', uid)
+                      .stream())
+            for doc in docs:
+                d = doc.to_dict()
+                out.append({
+                    'id':           doc.id,
+                    'name':         d.get('name'),
+                    'sequence':     d.get('sequence'),
+                    'length':       d.get('length'),
+                    'energy':       d.get('energy'),
+                    'final':        d.get('final_structure', {}),
+                    'has_unknowns': d.get('has_unknowns', False),
+                    'created_at':   str(d.get('created_at')),
+                })
+            # Sort newest-first in Python
+            out.sort(key=lambda x: x['created_at'] or '', reverse=True)
+        except Exception as fallback_err:
+            print(f"⚠️  Fallback query also failed: {fallback_err}")
+            return jsonify({'error': 'Could not fetch results', 'detail': str(fallback_err)}), 500
+
     return jsonify(out)
 
 
