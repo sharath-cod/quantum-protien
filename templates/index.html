@@ -217,106 +217,88 @@ nav{position:relative;z-index:10;background:var(--bg2);border-bottom:2px solid v
 .error-box{background:rgba(153,27,27,.08);border:1px solid var(--red);color:var(--red);
   padding:.8rem 1rem;border-radius:4px;margin-bottom:1rem;font-size:.9rem;}
 
-/* ── INVALID SEQUENCE ERROR PANEL ── */
-#seq-invalid-panel{
-  display:none;
-  background:linear-gradient(135deg,rgba(220,38,38,.07),rgba(224,94,58,.05));
-  border:1.5px solid rgba(220,38,38,.5);
-  border-left:4px solid var(--red);
-  border-radius:12px;
-  padding:1rem 1.1rem .85rem;
-  margin-top:.6rem;
-  animation:seqErrSlide .28s ease;
+/* ── INVALID SEQUENCE MODAL (from uploaded design) ── */
+#invalid-modal{
+  position:fixed;inset:0;background:rgba(10,20,20,0.82);z-index:3000;
+  display:none;align-items:center;justify-content:center;
+  backdrop-filter:blur(4px);
 }
-@keyframes seqErrSlide{
-  from{opacity:0;transform:translateY(-6px);}
-  to{opacity:1;transform:translateY(0);}
+#invalid-modal.show{display:flex;}
+.inv-card{
+  background:linear-gradient(145deg,#0f1f1f,#1a0a0a);
+  border:2px solid var(--red);border-radius:18px;
+  padding:2rem 2.2rem;max-width:520px;width:92vw;
+  box-shadow:0 0 40px rgba(220,38,38,.35),0 0 80px rgba(220,38,38,.12);
+  animation:invPop .3s cubic-bezier(.34,1.56,.64,1);
+  position:relative;
 }
-#seq-invalid-panel.show{ display:block; }
-
-.sip-title{
-  font-family:'Orbitron',monospace;
-  font-size:.72rem;
-  font-weight:700;
-  letter-spacing:1.5px;
-  color:var(--red);
-  text-transform:uppercase;
-  display:flex;
-  align-items:center;
-  gap:.45rem;
-  margin-bottom:.5rem;
-}
-.sip-pulse{
-  width:8px;height:8px;border-radius:50%;
-  background:var(--red);
-  animation:sipPulse 1s ease-in-out infinite;
-  flex-shrink:0;
-}
-@keyframes sipPulse{
-  0%,100%{transform:scale(1);opacity:1;}
-  50%{transform:scale(1.55);opacity:.5;}
-}
-.sip-main{
-  font-size:.82rem;
-  color:#b91c1c;
-  font-weight:600;
-  margin-bottom:.4rem;
-  line-height:1.5;
-}
-.sip-sub{
-  font-size:.74rem;
-  color:var(--dim);
-  line-height:1.65;
-  margin-bottom:.55rem;
-}
-.sip-bad-chars{
-  display:flex;
-  flex-wrap:wrap;
-  gap:.3rem;
-  margin-bottom:.55rem;
-}
-.sip-bad-char{
-  font-family:'Orbitron',monospace;
-  font-size:.7rem;
-  font-weight:700;
-  padding:.18rem .55rem;
-  border-radius:6px;
-  background:rgba(220,38,38,.13);
-  border:1px solid rgba(220,38,38,.4);
-  color:#b91c1c;
-  letter-spacing:1px;
-}
-.sip-hint{
-  font-size:.7rem;
-  color:#4d7c78;
-  background:rgba(13,148,136,.07);
-  border:1px solid rgba(13,148,136,.2);
-  border-radius:7px;
-  padding:.4rem .7rem;
-  line-height:1.6;
-}
-.sip-hint strong{ color:var(--accent); }
-
-/* Input shakes red when invalid */
-.seq-input.invalid{
-  border-color:var(--red) !important;
-  box-shadow:0 0 0 3px rgba(220,38,38,.12) !important;
-  animation:seqShake .35s ease;
-}
-@keyframes seqShake{
+@keyframes invPop{from{transform:scale(.8);opacity:0;}to{transform:scale(1);opacity:1;}}
+.inv-icon{font-size:3rem;text-align:center;display:block;margin-bottom:.5rem;
+  animation:invShake .5s ease .1s;}
+@keyframes invShake{
   0%,100%{transform:translateX(0);}
-  20%{transform:translateX(-5px);}
-  40%{transform:translateX(5px);}
-  60%{transform:translateX(-3px);}
-  80%{transform:translateX(3px);}
+  20%{transform:translateX(-6px);}
+  40%{transform:translateX(6px);}
+  60%{transform:translateX(-4px);}
+  80%{transform:translateX(4px);}
 }
-/* Btn blocked state */
-.btn-analyze.blocked{
-  background:linear-gradient(135deg,#9ca3af,#6b7280) !important;
-  cursor:not-allowed !important;
-  box-shadow:none !important;
+.inv-title{
+  font-family:'Orbitron',monospace;font-size:1.1rem;font-weight:900;
+  color:#ff4444;text-align:center;letter-spacing:2px;
+  margin-bottom:.4rem;text-transform:uppercase;
 }
-.btn-analyze.blocked:hover{ transform:none !important; }
+.inv-subtitle{
+  text-align:center;font-size:.8rem;color:rgba(255,100,100,.75);
+  letter-spacing:1.5px;margin-bottom:1.2rem;
+}
+.inv-section{margin-bottom:1rem;}
+.inv-label{font-size:.7rem;color:rgba(255,200,200,.6);letter-spacing:1.5px;
+  text-transform:uppercase;margin-bottom:.35rem;}
+.inv-invalid-chars{display:flex;flex-wrap:wrap;gap:.4rem;}
+.inv-char-badge{
+  background:rgba(220,38,38,.2);border:1px solid rgba(220,38,38,.5);
+  color:#ff8080;font-family:monospace;font-size:.95rem;font-weight:700;
+  padding:.2rem .6rem;border-radius:6px;letter-spacing:1px;
+}
+.inv-valid-grid{display:flex;flex-wrap:wrap;gap:.3rem;}
+.inv-valid-aa{
+  background:rgba(13,148,136,.15);border:1px solid rgba(13,148,136,.35);
+  color:#5eead4;font-family:monospace;font-size:.75rem;font-weight:700;
+  padding:.15rem .45rem;border-radius:5px;
+}
+.inv-examples{display:flex;flex-direction:column;gap:.4rem;}
+.inv-ex-row{
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);
+  border-radius:8px;padding:.45rem .7rem;cursor:pointer;transition:all .2s;
+}
+.inv-ex-row:hover{border-color:var(--accent);background:rgba(13,148,136,.1);}
+.inv-ex-name{font-size:.7rem;color:rgba(200,255,240,.6);letter-spacing:1px;margin-bottom:2px;}
+.inv-ex-seq{font-family:monospace;font-size:.78rem;color:#5eead4;word-break:break-all;}
+.inv-close{
+  width:100%;margin-top:1.2rem;
+  background:linear-gradient(135deg,#7f1d1d,#dc2626);
+  border:none;color:white;padding:.75rem;border-radius:10px;
+  font-family:'Orbitron',monospace;font-size:.8rem;letter-spacing:2px;
+  cursor:pointer;font-weight:700;transition:all .2s;
+}
+.inv-close:hover{opacity:.85;transform:translateY(-1px);}
+.inv-dismiss{
+  width:100%;margin-top:.5rem;
+  background:transparent;border:1px solid rgba(255,255,255,.15);
+  color:rgba(255,255,255,.5);padding:.5rem;border-radius:8px;
+  font-family:'Exo 2',sans-serif;font-size:.8rem;cursor:pointer;transition:all .2s;
+}
+.inv-dismiss:hover{border-color:rgba(255,255,255,.35);color:rgba(255,255,255,.75);}
+/* textarea flash on invalid */
+.seq-input.invalid-flash{
+  border-color:var(--red)!important;
+  box-shadow:0 0 0 3px rgba(220,38,38,.2)!important;
+  animation:flashBorder .6s ease;
+}
+@keyframes flashBorder{
+  0%,100%{box-shadow:0 0 0 3px rgba(220,38,38,.2);}
+  50%{box-shadow:0 0 0 6px rgba(220,38,38,.4);}
+}
 
 /* TOAST */
 #toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--bg2);
@@ -837,6 +819,46 @@ nav{position:relative;z-index:10;background:var(--bg2);border-bottom:2px solid v
 <!-- Particle canvas background -->
 <canvas id="particles"></canvas>
 
+<!-- ══ INVALID SEQUENCE MODAL ══ -->
+<div id="invalid-modal">
+  <div class="inv-card">
+    <span class="inv-icon">🧬❌</span>
+    <div class="inv-title">Invalid Amino Acid Sequence</div>
+    <div class="inv-subtitle">Please provide a valid protein sequence</div>
+
+    <div class="inv-section" id="inv-bad-section">
+      <div class="inv-label">🚫 Invalid Characters Detected</div>
+      <div class="inv-invalid-chars" id="inv-bad-chars"></div>
+    </div>
+
+    <div class="inv-section">
+      <div class="inv-label">✅ Valid Amino Acid Codes (20 Standard)</div>
+      <div class="inv-valid-grid" id="inv-valid-grid"></div>
+    </div>
+
+    <div class="inv-section">
+      <div class="inv-label">💡 Try One of These Valid Examples</div>
+      <div class="inv-examples">
+        <div class="inv-ex-row" onclick="loadInvExample('GIVEQCCTSICSLYQLENYCN','Insulin A-chain')">
+          <div class="inv-ex-name">Insulin A-chain</div>
+          <div class="inv-ex-seq">GIVEQCCTSICSLYQLENYCN</div>
+        </div>
+        <div class="inv-ex-row" onclick="loadInvExample('DAEFRHDSGYEVHHQKLVFFAEDVGSNKGAIIGLMVGGVVIA','Beta Amyloid')">
+          <div class="inv-ex-name">Beta Amyloid (Alzheimer's)</div>
+          <div class="inv-ex-seq">DAEFRHDSGYEVHHQKLVFFAEDVGSNKGAIIGLMVGGVVIA</div>
+        </div>
+        <div class="inv-ex-row" onclick="loadInvExample('AELMAELMAELMAELM','Pure Alpha Helix')">
+          <div class="inv-ex-name">Pure Alpha Helix Demo</div>
+          <div class="inv-ex-seq">AELMAELMAELMAELM</div>
+        </div>
+      </div>
+    </div>
+
+    <button class="inv-close" onclick="closeInvalidModal()">✏️ CORRECT MY SEQUENCE</button>
+    <button class="inv-dismiss" onclick="closeInvalidModal()">Dismiss</button>
+  </div>
+</div>
+
 <!-- LOADING -->
 <div id="loading">
   <div class="loading-orb"></div>
@@ -914,24 +936,6 @@ nav{position:relative;z-index:10;background:var(--bg2);border-bottom:2px solid v
           <div class="seq-stat">Length: <span id="seq-len">0</span> aa</div>
           <div class="seq-stat">Valid: <span id="seq-valid">0</span></div>
           <div class="seq-stat">Hydrophobic: <span id="seq-hydro">-</span></div>
-        </div>
-
-        <!-- Invalid sequence error panel -->
-        <div id="seq-invalid-panel">
-          <div class="sip-title">
-            <span class="sip-pulse"></span>
-            ⚠ Invalid Amino Acid Sequence Detected
-          </div>
-          <div class="sip-main" id="sip-main-msg">
-            ✗ Invalid amino acid sequence — please enter a valid sequence.
-          </div>
-          <div class="sip-sub" id="sip-sub-msg"></div>
-          <div class="sip-bad-chars" id="sip-bad-chars"></div>
-          <div class="sip-hint">
-            <strong>Valid single-letter codes:</strong> A C D E F G H I K L M N P Q R S T V W Y<br>
-            <strong>Example:</strong> <code>ACDEFGHIKLMNPQRSTVWY</code> &nbsp;·&nbsp;
-            Spaces, dashes and digits are automatically stripped.
-          </div>
         </div>
 
         <!-- AA chain preview -->
@@ -1350,306 +1354,44 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ─────────────────────────────────────────────
-// SEQUENCE INPUT + DEEP BIOLOGICAL VALIDATION
+// SEQUENCE INPUT + VALIDATION
 // ─────────────────────────────────────────────
-
-// Characters silently stripped before analysis
-const STRIP_CHARS  = new Set([' ','\t','\n','\r','-','0','1','2','3','4','5','6','7','8','9']);
-// IUPAC ambiguous codes
-const AMBIGUOUS_AA = new Set('BZOUJX');
-// VALID_AA = new Set('ACDEFGHIKLMNPQRSTVWY')  — defined above
-
-// ── Biological plausibility engine ──
-// Expected amino acid frequencies in real proteins (UniProt Swiss-Prot statistics)
-const AA_FREQ = {
-  A:0.0826, R:0.0553, N:0.0406, D:0.0546, C:0.0137,
-  Q:0.0393, E:0.0674, G:0.0708, H:0.0227, I:0.0593,
-  L:0.0965, K:0.0583, M:0.0241, F:0.0386, P:0.0470,
-  S:0.0657, T:0.0534, W:0.0108, Y:0.0292, V:0.0686
-};
-
-// Letters that NEVER appear in real proteins (dead giveaway of random text)
-const NEVER_IN_PROTEINS = new Set('BJOUZ');
-
-// Common English words whose letters all happen to be valid AA codes
-// Used to catch obvious word inputs
-const COMMON_WORDS = new Set([
-  'HELLO','WORLD','FILM','ACNE','MINE','CAME','GAME','NAME','SAME','FAME',
-  'LAME','DAME','TAME','LANE','CANE','VANE','FINE','LINE','VINE','WINE',
-  'DINE','NINE','PINE','SINE','MINE','TINE','LIFE','LIKE','LIME','TIME',
-  'TILE','FILE','MILE','VILE','WILD','MILD','WILL','FILL','HILL','KILL',
-  'MILL','TILL','SILK','MILK','LINK','SINK','RINK','WINK','PINK','MIND',
-  'KIND','FIND','WIND','HIND','DIET','TIED','LIED','DIED','VIED','MAIN',
-  'RAIN','GAIN','PAIN','VAIN','SAIL','TAIL','MAIL','FAIL','HAIL','WAIL',
-  'RAIL','TALL','FALL','CALL','HALL','WALL','MALL','TALK','WALK','STALK',
-  'CLAIM','TRAIL','EMAIL','MEDIA','IDEAL','FINAL','LEGAL','METAL','TOTAL',
-  'VITAL','VIRAL','RIVAL','TIDAL','MEDAL','PEDAL','VALID','FIELD','YIELD',
-  'WIELD','CHILD','WHILE','SMILE','STILE','TRIAL','TWILL','SMALL','SNAIL',
-  'THANK','THINK','THING','BEING','THEIR','THERE','THESE','THOSE','WHICH',
-  'WHILE','MIGHT','NIGHT','LIGHT','RIGHT','SIGHT','TIGHT','FIGHT','EIGHT',
-  'AGAIN','STILL','SKILL','SPILL','SWILL','GRILL','DRILL','THRILL','CHILL',
-  'ANIMAL','SIGNAL','DETAIL','DENIAL','PENCIL','RETAIL','RENTAL','MENTAL',
-  'DENTAL','GENTLE','SINGLE','SIMPLE','SAMPLE','HANDLE','CANDLE','EXAMPLE',
-  'WILLIAM','MICHAEL','RICHARD','MILLION','GENERAL','MINERAL','MINIMAL',
-  'INITIAL','NATURAL','DIGITAL','MEDICAL','CAPITAL','CHEMICAL','CRIMINAL',
-  'MATERIAL','NATIONAL','MAINTAIN','CHILDREN','CIVILIAN','FINANCIAL',
-  'THINKING','DRINKING','FEELING','SLEEPING','WALKING','TALKING','CALLING',
-  'FALLING','FILLING','KILLING','MILLING','TELLING','SELLING','SMILING',
-  'INVALID','INVALID','TESTING','FAILING','WINNING','GAINING','WAITING',
-  'SEATING','HEATING','MEETING','MELTING','MINTING','TILTING','WILTING',
-  'LIFTING','GIFTING','GIFTED','SKILLED','FILLED','KILLED','MILLED','WILLED',
-  'MINIMAL','ANIMAL','CRIMINAL','TERMINAL','INTERNAL','EXTERNAL','IDENTICAL',
-  'ATHLETIC','ENERGETIC','SYNTHETIC','REALISTIC','FANTASTIC','DRAMATIC',
-  'ELASTIC','ARTISTIC','MAGNETIC','GENETIC','KINETIC','METALLIC','METALIC',
-  'SEMANTIC','DYNAMIC','CERAMIC','ORGANIC','CLASSIC','STATIC','HECTIC',
-  'TITLE','LITTLE','SETTLE','NETTLE','KETTLE','METTLE','CATTLE','RATTLE',
-  'TATTLE','BATTLE','GENTLE','FICKLE','TICKLE','MINGLE','SINGLE','TINGLE',
-  'MINGLE','JINGLE','DINGLE','KINDLE','MANTLE','MENTAL','DENTAL','RENTAL',
-  'RENTAL','TINSEL','FENNEL','KENNEL','KERNEL','CHANNEL','FLANNEL','TUNNEL',
-  'FUNNEL','TASSEL','VESSEL','CASTLE','NESTLE','WRESTLE','GENTLE','MISSILE',
-  'THISTLE','WHISTLE','THISTLE','LISTEN','FASTEN','KITCHEN','MITTEN','KITTEN',
-  'RIDDEN','HIDDEN','LINDEN','TENDER','RENDER','FENDER','GENDER','SLENDER',
-  'SENDER','VENDOR','WINTER','HINDER','CINDER','TINDER','FINDER','MINDER',
-  'WINDER','KINDER','LINGER','FINGER','GINGER','SINGER','WINGED','TINGED',
-  'HINGED','SINGED','WINGER','DANGER','RANGER','MANGER','HANGER','LANGUID',
-  'TANGLED','MANGLED','WRANGLED','FANGLED','DANGLED','TWINKLE','WRINKLE',
-  'CRINKLE','TINKLE','SPRINKLE','TWINKLED','WRINKLED','LINKED','KINKED',
-  'INKED','SINKED','WINKED','RINKED','DINKED','TINKED','MINKED','FINKED',
-]);
-
-/**
- * Score how biologically plausible a sequence is.
- * Returns { score: 0-100, reason: string, isPlausible: bool }
- * 
- * Method:
- * 1. Check for letters that never appear in proteins (J, O, U, etc.)
- * 2. Detect exact common English word matches
- * 3. Chi-square divergence from real protein AA frequency distribution
- * 4. Check for biologically impossible repeat patterns (AAAAAAA)
- * 5. Check for common English bigrams/trigrams (TH, HE, AND, ING, THE...)
- * 6. Minimum diversity check — real proteins use many different residues
- */
-function scoreBiologicalPlausibility(seq){
-  const s = seq.toUpperCase();
-  const n = s.length;
-  if(n === 0) return { score:0, reason:'empty', isPlausible:false };
-
-  // 1. Letters that cannot be in proteins
-  const impossible = [...new Set([...s].filter(c => NEVER_IN_PROTEINS.has(c)))];
-  if(impossible.length > 0){
-    return {
-      score: 0,
-      reason: `Contains letter${impossible.length>1?'s':''} that never appear in protein sequences: ${impossible.join(', ')}`,
-      isPlausible: false,
-      badChars: impossible
-    };
-  }
-
-  // 2. Exact common English word match (for short inputs)
-  if(n <= 20 && COMMON_WORDS.has(s)){
-    return {
-      score: 0,
-      reason: `"${s}" is an English word, not an amino acid sequence`,
-      isPlausible: false,
-      isWord: true
-    };
-  }
-
-  // 3. English bigram/trigram fingerprint
-  // These combinations appear very frequently in English but almost never in proteins
-  const ENGLISH_TRIGRAMS = ['THE','AND','ING','ION','ENT','FOR','HER','HIS',
-    'NOT','BUT','YOU','ALL','CAN','HAD','HIM','HIS','HOW','MAN','NEW',
-    'NOW','OLD','SEE','TWO','WAY','WHO','BOY','DID','ITS','LET','PUT',
-    'SAY','SHE','TOO','USE','DAD','MOM','SON','TEN','SET','GET','GOT',
-    'HIT','HIT','LET','MET','NET','PET','VET','WET','YET','BIT','FIT',
-    'KIT','SIT','WIT','CUT','GUT','HUT','NUT','RUT','TUT',
-    'TION','MENT','NESS','LESS','LING','DING','RING','SING','KING','WING',
-    'IGHT','IGHT','IGHT','IGHT','IGHT',
-  ];
-  let englishTrigrams = 0;
-  for(const tg of ENGLISH_TRIGRAMS){
-    if(s.includes(tg)) englishTrigrams++;
-  }
-  // Normalise: how many trigrams per 10 chars
-  const trigramDensity = (englishTrigrams / Math.max(n/3, 1));
-  if(trigramDensity >= 1.5 && n >= 6){
-    return {
-      score: 0,
-      reason: `Sequence contains ${englishTrigrams} common English word pattern${englishTrigrams>1?'s':''} (e.g. ${ENGLISH_TRIGRAMS.filter(t=>s.includes(t)).slice(0,3).join(', ')}). This looks like plain text, not a protein sequence.`,
-      isPlausible: false,
-      isText: true
-    };
-  }
-
-  // 4. Chi-square divergence from real protein composition
-  // Count each AA in the input
-  const counts = {};
-  for(const c of s){ counts[c] = (counts[c]||0) + 1; }
-  let chiSq = 0;
-  for(const [aa, expectedFreq] of Object.entries(AA_FREQ)){
-    const observed = (counts[aa]||0) / n;
-    const expected = expectedFreq;
-    chiSq += Math.pow(observed - expected, 2) / expected;
-  }
-  // chiSq > 2.5 for short seqs, > 1.8 for long seqs = very unlike real protein
-  const chiThreshold = n < 10 ? 3.5 : n < 20 ? 2.8 : n < 50 ? 2.0 : 1.6;
-
-  // 5. Diversity check — real proteins use many different residues
-  const uniqueAA   = Object.keys(counts).length;
-  const diversity  = uniqueAA / Math.min(n, 20); // proportion of alphabet used
-  // Very low diversity (e.g. AAAAAAA, MIMIMI) = suspicious
-  const tooRepetitive = n >= 6 && diversity < 0.15;
-
-  // 6. Check for single-AA repeats: AAAAAAA
-  const singleRepeat = /^(.)\1{4,}$/.test(s);
-
-  // 7. Combine: chiSq + diversity + trigram density into final score
-  // Plausibility score: 100 = definitely protein, 0 = definitely not
-  let score = 100;
-  score -= Math.min(60, chiSq * 15);          // penalise frequency mismatch
-  score -= Math.min(25, trigramDensity * 20); // penalise English patterns
-  score += diversity * 20;                     // reward diversity
-  if(tooRepetitive) score -= 35;
-  if(singleRepeat)  score -= 50;
-  score = Math.max(0, Math.min(100, Math.round(score)));
-
-  // Decide: below threshold = not plausible
-  const isPlausible = score >= 30 && !tooRepetitive && !singleRepeat && chiSq < chiThreshold;
-
-  let reason = '';
-  if(!isPlausible){
-    if(singleRepeat){
-      reason = `Sequence is a single letter repeated — not a meaningful protein sequence.`;
-    } else if(tooRepetitive){
-      reason = `Sequence has very low residue diversity (only ${uniqueAA} unique amino acids in ${n} positions) — real proteins use many different residues.`;
-    } else if(chiSq >= chiThreshold){
-      // Find the most over/under represented letters to give a helpful hint
-      const overRep = Object.entries(counts)
-        .map(([aa,c])=>({aa, diff:(c/n)-(AA_FREQ[aa]||0)}))
-        .filter(x=>x.diff > 0.1)
-        .sort((a,b)=>b.diff-a.diff)
-        .slice(0,3)
-        .map(x=>`${x.aa}(${Math.round(x.diff*100)}% above expected)`);
-      reason = `Amino acid composition does not match any known protein profile. ` +
-               (overRep.length ? `Over-represented: ${overRep.join(', ')}. ` : '') +
-               `This appears to be random text or a non-biological sequence.`;
-    } else {
-      reason = `Sequence does not match protein composition patterns.`;
-    }
-  }
-
-  return { score, reason, isPlausible, chiSq: chiSq.toFixed(2), diversity: diversity.toFixed(2) };
-}
+const VALID_AA_LIST = ['A','C','D','E','F','G','H','I','K','L','M','N','P','Q','R','S','T','V','W','Y'];
 
 function updateSeqStats(){
-  const raw      = document.getElementById('seq-input').value.toUpperCase();
-  const textarea = document.getElementById('seq-input');
-  const btn      = document.getElementById('btn-analyze');
-  const panel    = document.getElementById('seq-invalid-panel');
+  const raw = document.getElementById('seq-input').value.toUpperCase().replace(/\s/g,'');
+  const valid = [...raw].filter(c => VALID_AA.has(c));
+  document.getElementById('seq-len').textContent = raw.length;
+  document.getElementById('seq-valid').textContent = valid.length;
 
-  // Strip whitespace/digits/dashes silently (same as backend)
-  const stripped = [...raw].filter(c => !STRIP_CHARS.has(c)).join('');
+  const hydro = new Set('ACFILMVWY');
+  const hCount = valid.filter(c => hydro.has(c)).length;
+  document.getElementById('seq-hydro').textContent = valid.length ? `${Math.round(hCount/valid.length*100)}%` : '-';
 
-  // Char-level split
-  const validChars     = [...stripped].filter(c => VALID_AA.has(c));
-  const ambiguousChars = [...new Set([...stripped].filter(c => AMBIGUOUS_AA.has(c)))];
-  const invalidChars   = [...new Set([...stripped].filter(c => !VALID_AA.has(c) && !AMBIGUOUS_AA.has(c)))];
-
-  document.getElementById('seq-len').textContent   = stripped.length;
-  document.getElementById('seq-valid').textContent = validChars.length + ambiguousChars.length;
-
-  const hydro  = new Set('ACFILMVWY');
-  const allAA  = [...validChars, ...ambiguousChars.map(c=>({B:'D',Z:'E',O:'K',U:'C',J:'L',X:'A'}[c]||c))];
-  const hCount = allAA.filter(c=>hydro.has(c)).length;
-  document.getElementById('seq-hydro').textContent = allAA.length ? `${Math.round(hCount/allAA.length*100)}%` : '-';
-
-  const isEmpty    = stripped.length === 0;
-  const hasInvalid = invalidChars.length > 0;
-  const tooShort   = !isEmpty && (validChars.length + ambiguousChars.length) < 3;
-
-  // Biological plausibility — only run on sequences that pass char-level check
-  let bioCheck = { isPlausible: true, reason: '', score: 100 };
-  if(!isEmpty && !hasInvalid && !tooShort && validChars.length >= 3){
-    bioCheck = scoreBiologicalPlausibility(validChars.join(''));
-  }
-
-  const isNotProtein = !isEmpty && !hasInvalid && !tooShort && !bioCheck.isPlausible;
-
-  // ── Show/hide error panel ──
-  function showError(mainMsg, subMsg, badCharsList=[]){
-    textarea.classList.add('invalid');
-    panel.classList.add('show');
-    btn.classList.add('blocked');
-    btn.disabled = true;
-    document.getElementById('sip-main-msg').textContent = mainMsg;
-    document.getElementById('sip-sub-msg').textContent  = subMsg;
-    document.getElementById('sip-bad-chars').innerHTML  = badCharsList.map(c=>
-      `<span class="sip-bad-char">"${c}"</span>`).join('');
-  }
-
-  if(hasInvalid){
-    showError(
-      `✗ Invalid amino acid sequence — ${invalidChars.length} unrecognised character${invalidChars.length>1?'s':''} found.`,
-      `The following character${invalidChars.length>1?'s are':' is'} not part of the amino acid alphabet. Remove ${invalidChars.length>1?'them':'it'} before running analysis.`,
-      invalidChars
-    );
-  } else if(tooShort && !isEmpty){
-    showError(
-      `✗ Sequence too short — minimum 3 amino acid residues required (found ${validChars.length+ambiguousChars.length}).`,
-      'Please enter a complete sequence of at least 3 residues for meaningful analysis.',
-      []
-    );
-  } else if(isNotProtein){
-    // Rich biological rejection
-    const score   = bioCheck.score;
-    const scoreLabel = score < 10 ? 'Not a protein' : score < 30 ? 'Very unlikely protein' : 'Unlikely protein';
-    showError(
-      `✗ Not a valid amino acid sequence — "${stripped.slice(0,18)}${stripped.length>18?'…':''}" does not match any known protein composition.`,
-      bioCheck.reason,
-      []
-    );
-    // Show a plausibility score badge
-    const badEl = document.getElementById('sip-bad-chars');
-    badEl.innerHTML =
-      `<span class="sip-bad-char" style="background:rgba(220,38,38,.18);border-color:rgba(220,38,38,.5);">` +
-        `Protein Score: ${score}/100` +
-      `</span>` +
-      `<span class="sip-bad-char" style="background:rgba(224,94,58,.13);border-color:rgba(224,94,58,.4);color:#c04020;">` +
-        `${scoreLabel}` +
-      `</span>` +
-      (bioCheck.chiSq ? `<span class="sip-bad-char" style="background:rgba(109,40,217,.1);border-color:rgba(109,40,217,.35);color:#6d28d9;">χ² divergence: ${bioCheck.chiSq}</span>` : '');
-  } else {
-    // All clear
-    textarea.classList.remove('invalid');
-    panel.classList.remove('show');
-    btn.classList.remove('blocked');
-    btn.disabled = false;
-  }
-
-  // Custom sequence detection (only when valid + plausible)
   const knownSeqs = new Set([
-    'GIVEQCCTSICSLYQLENYCN','DAEFRHDSGYEVHHQKLVFFAEDVGSNKGAIIGLMVGGVVIA',
+    'GIVEQCCTSICSLYQLENYCN',
+    'DAEFRHDSGYEVHHQKLVFFAEDVGSNKGAIIGLMVGGVVIA',
     'AELMAELMAELMAELM','CFIVWYCFIVWYCFIVWY',
     'MSKGEELFTGVVPILVELDGDVNGHKFSVSGEGEGDATYGKLT',
-    'PQITLWQRPLVTIKIGGQLKEALLDTGADDTVLEEMSLPGRWKPK','AXBZELMAEFGIVWYXBZ'
+    'PQITLWQRPLVTIKIGGQLKEALLDTGADDTVLEEMSLPGRWKPK',
+    'AXBZELMAEFGIVWYXBZ'
   ]);
   const customEl = document.getElementById('custom-detect');
-  if(stripped.length > 3 && !knownSeqs.has(stripped) && !hasInvalid && !isNotProtein){
+  if(raw.length > 3 && !knownSeqs.has(raw)){
     customEl.classList.add('show');
   } else {
     customEl.classList.remove('show');
   }
 
-  // AA chain preview (first 50 valid residues)
   const chain = document.getElementById('aa-chain');
   const COLORS = {A:'#FF6B6B',C:'#4ECDC4',D:'#45B7D1',E:'#96CEB4',F:'#FFEAA7',G:'#DDA0DD',
     H:'#98D8C8',I:'#F7DC6F',K:'#BB8FCE',L:'#F8C471',M:'#82E0AA',N:'#85C1E9',
     P:'#F1948A',Q:'#A9CCE3',R:'#A3E4D7',S:'#FAD7A0',T:'#D2B4DE',V:'#AED6F1',
     W:'#A9DFBF',Y:'#F9E79F'};
-  const preview = validChars.slice(0,50);
-  chain.innerHTML = preview.map(aa=>
+  const preview = valid.slice(0, 50);
+  chain.innerHTML = preview.map(aa =>
     `<div class="aa-node" style="background:${COLORS[aa]||'#888'}" title="${aa}">${aa}</div>`
-  ).join('') + (validChars.length>50 ? `<span style="color:var(--dim);font-size:.75rem;align-self:center;">+${validChars.length-50} more</span>` : '');
+  ).join('') + (valid.length > 50 ? `<span style="color:var(--dim);font-size:.75rem;align-self:center;">+${valid.length-50} more</span>` : '');
 }
 
 // ─────────────────────────────────────────────
@@ -1681,45 +1423,27 @@ function loadExample(seq, name){
 // ANALYZE
 // ─────────────────────────────────────────────
 async function analyze(){
-  const rawInput = document.getElementById('seq-input').value;
-  const name     = document.getElementById('protein-name').value || 'Unnamed Protein';
-  const errBox   = document.getElementById('error-box');
-  const btn      = document.getElementById('btn-analyze');
+  const seq  = document.getElementById('seq-input').value.toUpperCase().replace(/\s/g,'');
+  const name = document.getElementById('protein-name').value || 'Unnamed Protein';
+  const errBox = document.getElementById('error-box');
 
   errBox.style.display = 'none';
 
-  // Strip silently (mirrors backend)
-  const stripped = [...rawInput.toUpperCase()].filter(c => !STRIP_CHARS.has(c)).join('');
+  if(!seq){ showError('⚠️ Please enter a protein sequence before analyzing.'); return; }
 
-  if(!stripped){
-    showError('⚠ Please enter a protein sequence before running analysis.');
+  // ── Frontend pre-validation ──
+  const cleanedSeq = seq.replace(/[\-\s\d]/g,'');
+  const badChars = [...new Set([...cleanedSeq].filter(c => !VALID_AA.has(c)))];
+  if(badChars.length > 0){
+    showInvalidModal(badChars);
+    document.getElementById('seq-input').classList.add('invalid-flash');
+    setTimeout(()=>document.getElementById('seq-input').classList.remove('invalid-flash'),1500);
     return;
   }
-
-  // Hard block if button is in blocked state (invalid chars / too short)
-  if(btn.classList.contains('blocked')){
-    // Shake the error panel to draw attention
-    const panel = document.getElementById('seq-invalid-panel');
-    panel.style.animation = 'none';
-    requestAnimationFrame(() => { panel.style.animation = ''; panel.classList.add('show'); });
-    return;
+  if(cleanedSeq.length < 3){
+    showError('⚠️ Sequence too short! Please enter at least 3 amino acid residues.'); return;
   }
 
-  // Final client-side sanity check before sending
-  const invalidChars = [...new Set([...stripped].filter(c => !VALID_AA.has(c) && !AMBIGUOUS_AA.has(c)))];
-  if(invalidChars.length > 0){
-    showError(`✗ Invalid amino acid sequence — unrecognised characters: ${invalidChars.map(c=>`"${c}"`).join(', ')}. Use only standard single-letter amino acid codes (A C D E F G H I K L M N P Q R S T V W Y).`);
-    return;
-  }
-
-  // Biological plausibility gate
-  const bioCheck = scoreBiologicalPlausibility(stripped);
-  if(!bioCheck.isPlausible){
-    showError(`✗ Not a valid amino acid sequence. ${bioCheck.reason} Please enter a real protein sequence.`);
-    return;
-  }
-
-  const seq = stripped;
 
   // Show loading with steps
   showLoading(true);
@@ -1742,7 +1466,16 @@ async function analyze(){
     clearInterval(stepInterval);
     showLoading(false);
 
-    if(!res.ok){ showError(data.error || 'Analysis failed'); return; }
+    if(!res.ok){
+      if(data.validation_failed && data.invalid_chars){
+        showInvalidModal(data.invalid_chars);
+        document.getElementById('seq-input').classList.add('invalid-flash');
+        setTimeout(()=>document.getElementById('seq-input').classList.remove('invalid-flash'),1500);
+      } else {
+        showError(data.error || 'Analysis failed');
+      }
+      return;
+    }
 
     // Show unknown input warning if any substitutions/skips occurred
     const notes = data.ai_result?.input_notes;
@@ -1751,7 +1484,7 @@ async function analyze(){
     if(notes && notes.has_unknowns){
       let msg = '';
       if(notes.substitutions.length)
-        msg += notes.substitutions.map(s=>`${s.original}→${s.mapped_to} (pos ${s.position})`).join(', ') + '. ';
+        msg += notes.substitutions.map(s=>`${s.original}\u2192${s.mapped_to} (pos ${s.position})`).join(', ') + '. ';
       if(notes.skipped_chars.length)
         msg += `Skipped unrecognized: ${notes.skipped_chars.map(s=>s.char).join(', ')}. `;
       msg += `Confidence reduced by ${notes.confidence_penalty}%.`;
@@ -1773,6 +1506,36 @@ async function analyze(){
     showError('Server error: ' + err.message);
   }
 }
+
+// ─────────────────────────────────────────────
+// INVALID SEQUENCE MODAL FUNCTIONS
+// ─────────────────────────────────────────────
+function showInvalidModal(badChars){
+  const badEl = document.getElementById('inv-bad-chars');
+  badEl.innerHTML = badChars.map(c=>`<span class="inv-char-badge">${c}</span>`).join('');
+  document.getElementById('inv-bad-section').style.display = badChars.length ? 'block' : 'none';
+  const validEl = document.getElementById('inv-valid-grid');
+  validEl.innerHTML = VALID_AA_LIST.map(aa=>`<span class="inv-valid-aa">${aa}</span>`).join('');
+  document.getElementById('invalid-modal').classList.add('show');
+}
+
+function closeInvalidModal(){
+  document.getElementById('invalid-modal').classList.remove('show');
+  setTimeout(()=>{ document.getElementById('seq-input').focus(); }, 200);
+}
+
+function loadInvExample(seq, name){
+  document.getElementById('seq-input').value = seq;
+  document.getElementById('protein-name').value = name;
+  updateSeqStats();
+  closeInvalidModal();
+  toast('\u{1F4A1} Example loaded! Click Analyze to run.');
+}
+
+// Close modal on backdrop click
+document.getElementById('invalid-modal').addEventListener('click', function(e){
+  if(e.target === this) closeInvalidModal();
+});
 
 // ─────────────────────────────────────────────
 // RENDER RESULTS
