@@ -1287,9 +1287,21 @@ async function register(){
 }
 
 async function signInGoogle(){
+  const errEl = document.getElementById('login-err');
+  errEl.textContent = '';
   try{
     await fbAuth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
-  } catch(e){ document.getElementById('login-err').textContent = e.message; }
+  } catch(e){
+    if(e.code === 'auth/popup-closed-by-user' || e.code === 'auth/cancelled-popup-request'){
+      // User closed the popup — not an error worth showing
+      return;
+    }
+    if(e.code === 'auth/popup-blocked'){
+      errEl.textContent = 'Popup was blocked by your browser. Please allow popups for this site and try again.';
+      return;
+    }
+    errEl.textContent = e.message;
+  }
 }
 
 function signOut(){ fbAuth.signOut(); }
