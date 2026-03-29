@@ -562,31 +562,116 @@ nav{position:relative;z-index:10;background:var(--bg2);border-bottom:2px solid v
   margin-bottom:.7rem;display:none;}
 .custom-detect.show{display:block;}
 
-/* AUTH OVERLAY */
-#auth-overlay{position:fixed;inset:0;background:rgba(240,250,250,0.97);z-index:2000;
-  display:flex;align-items:center;justify-content:center;}
-.auth-card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;
-  padding:2.5rem;width:380px;max-width:92vw;box-shadow:0 8px 32px rgba(13,148,136,.12);}
-.auth-logo{font-family:'Orbitron',monospace;font-size:1.2rem;font-weight:900;
-  background:linear-gradient(90deg,var(--accent),var(--accent2));
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:.3rem;}
-.auth-sub{font-size:.7rem;color:var(--dim);letter-spacing:2px;text-transform:uppercase;margin-bottom:1.8rem;}
-.auth-input{width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);
-  padding:.7rem 1rem;border-radius:10px;font-family:'Exo 2',sans-serif;font-size:.9rem;
-  margin-bottom:.7rem;outline:none;transition:border .2s;}
-.auth-input:focus{border-color:var(--accent);}
-.btn-auth{width:100%;background:linear-gradient(135deg,#0f766e,#e05e3a);border:none;color:white;
-  padding:.85rem;border-radius:10px;cursor:pointer;font-family:'Orbitron',monospace;
-  font-size:.8rem;letter-spacing:2px;font-weight:700;transition:all .2s;margin-bottom:.6rem;}
-.btn-auth:hover{opacity:.88;transform:translateY(-1px);}
-.btn-auth-ghost{width:100%;background:transparent;border:1px solid var(--border);color:var(--dim);
-  padding:.7rem;border-radius:10px;cursor:pointer;font-family:'Exo 2',sans-serif;font-size:.85rem;
-  transition:all .2s;margin-bottom:.5rem;}
-.btn-auth-ghost:hover{border-color:var(--accent);color:var(--accent);}
-.auth-toggle{color:var(--accent);cursor:pointer;font-size:.8rem;margin-top:.8rem;display:inline-block;}
-.auth-toggle:hover{text-decoration:underline;}
-.auth-err{color:var(--red);font-size:.75rem;margin-top:.4rem;min-height:1rem;}
-/* User pill in header */
+/* ══════════════════════════════════════════════════════
+   ANIMATED LOGIN PAGE
+══════════════════════════════════════════════════════ */
+#auth-overlay{
+  position:fixed;inset:0;z-index:2000;
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;
+  background:linear-gradient(135deg,#020c14 0%,#051a2e 25%,#0a2a1a 50%,#0d1f3c 75%,#050f1a 100%);
+  background-size:400% 400%;
+  animation:bgShift 12s ease infinite;
+}
+@keyframes bgShift{
+  0%{background-position:0% 50%;}
+  50%{background-position:100% 50%;}
+  100%{background-position:0% 50%;}
+}
+.aa-ribbon{
+  position:absolute;font-family:'Orbitron',monospace;font-size:.7rem;
+  letter-spacing:3px;pointer-events:none;white-space:nowrap;opacity:0;
+  animation:ribbonFloat linear infinite;
+}
+@keyframes ribbonFloat{
+  0%{opacity:0;transform:translateY(100vh) translateX(0);}
+  8%{opacity:.5;}
+  92%{opacity:.5;}
+  100%{opacity:0;transform:translateY(-12vh) translateX(var(--drift,20px));}
+}
+.dna-bubble{
+  position:absolute;border-radius:50%;pointer-events:none;
+  animation:bubbleDrift ease-in-out infinite;
+}
+@keyframes bubbleDrift{
+  0%,100%{transform:translateY(0) scale(1);}
+  50%{transform:translateY(-26px) scale(1.1);}
+}
+.scan-line{
+  position:absolute;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(13,148,136,.55),rgba(224,94,58,.35),rgba(13,148,136,.55),transparent);
+  animation:scanMove 7s linear infinite;pointer-events:none;
+}
+@keyframes scanMove{from{top:-1px;}to{top:100vh;}}
+.auth-card{
+  position:relative;z-index:10;width:430px;max-width:94vw;
+  background:rgba(5,18,30,.85);
+  border:1px solid rgba(13,148,136,.3);border-radius:22px;
+  padding:2.2rem 2.4rem 1.8rem;
+  box-shadow:0 0 0 1px rgba(13,148,136,.08),0 32px 80px rgba(0,0,0,.65),0 0 55px rgba(13,148,136,.07),inset 0 1px 0 rgba(255,255,255,.05);
+  backdrop-filter:blur(20px);
+  animation:cardIn .7s cubic-bezier(.34,1.56,.64,1) both;
+}
+@keyframes cardIn{from{opacity:0;transform:scale(.88) translateY(28px);}to{opacity:1;transform:none;}}
+.auth-card::before{
+  content:'';position:absolute;top:0;left:8%;right:8%;height:2px;
+  background:linear-gradient(90deg,transparent,#0d9488,#e05e3a,#0d9488,transparent);
+  border-radius:999px;
+}
+.auth-characters{
+  display:flex;justify-content:space-between;align-items:flex-end;
+  margin-bottom:1.2rem;position:relative;height:118px;
+}
+.char-wrap{display:flex;flex-direction:column;align-items:center;gap:3px;animation:charBob 3.2s ease-in-out infinite;}
+.char-wrap.right{animation-delay:.9s;}
+.char-wrap svg{filter:drop-shadow(0 5px 14px rgba(13,148,136,.45));}
+@keyframes charBob{0%,100%{transform:translateY(0);}50%{transform:translateY(-9px);}}
+.char-label{font-family:'Exo 2',sans-serif;font-size:.55rem;letter-spacing:1.5px;text-transform:uppercase;opacity:.6;}
+.char-label.girl{color:#5eead4;}
+.char-label.boy{color:#93c5fd;}
+.dna-helix-center{position:absolute;left:50%;top:8px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:4px;}
+.helix-rung{display:flex;align-items:center;gap:3px;animation:helixPulse 2.4s ease-in-out infinite;}
+.helix-rung:nth-child(odd){animation-direction:reverse;}
+@keyframes helixPulse{0%,100%{opacity:.5;transform:scaleX(1);}50%{opacity:1;transform:scaleX(1.3);}}
+.helix-dot{width:5px;height:5px;border-radius:50%;}
+.helix-line{width:20px;height:1px;background:rgba(13,148,136,.35);}
+.auth-logo{
+  font-family:'Orbitron',monospace;font-size:1rem;font-weight:900;text-align:center;
+  background:linear-gradient(90deg,#5eead4,#ffffff 45%,#fdba74 75%,#5eead4);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-size:250% 100%;animation:logoShimmer 4s linear infinite;
+  margin-bottom:.2rem;letter-spacing:.8px;
+}
+@keyframes logoShimmer{to{background-position:-250% 0;}}
+.auth-sub{font-size:.62rem;color:rgba(148,200,190,.58);letter-spacing:2.5px;text-transform:uppercase;text-align:center;margin-bottom:1.4rem;}
+.auth-divider{display:flex;align-items:center;gap:.6rem;margin:.65rem 0;}
+.auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:rgba(13,148,136,.18);}
+.auth-divider span{font-size:.62rem;color:rgba(148,200,190,.4);letter-spacing:2px;}
+.auth-input{
+  width:100%;background:rgba(13,148,136,.07);border:1px solid rgba(13,148,136,.22);
+  color:#d1faf5;padding:.72rem 1rem;border-radius:10px;
+  font-family:'Exo 2',sans-serif;font-size:.87rem;margin-bottom:.62rem;outline:none;transition:border .2s,box-shadow .2s;
+}
+.auth-input::placeholder{color:rgba(148,200,190,.32);}
+.auth-input:focus{border-color:#0d9488;box-shadow:0 0 0 3px rgba(13,148,136,.14);}
+.btn-auth{
+  width:100%;background:linear-gradient(135deg,#0f766e 0%,#0d9488 45%,#e05e3a 100%);
+  background-size:200% 100%;border:none;color:white;padding:.83rem;border-radius:10px;cursor:pointer;
+  font-family:'Orbitron',monospace;font-size:.73rem;letter-spacing:2px;font-weight:700;
+  transition:all .3s;margin-bottom:.55rem;box-shadow:0 4px 18px rgba(13,148,136,.28);
+}
+.btn-auth:hover{background-position:-100% 0;transform:translateY(-2px);box-shadow:0 8px 28px rgba(13,148,136,.44);}
+.btn-auth-ghost{
+  width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.16);
+  color:rgba(220,240,238,.82);padding:.7rem;border-radius:10px;cursor:pointer;
+  font-family:'Exo 2',sans-serif;font-size:.82rem;transition:all .2s;margin-bottom:.45rem;
+  display:flex;align-items:center;justify-content:center;gap:.5rem;
+}
+.btn-auth-ghost:hover{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.32);transform:translateY(-1px);}
+.auth-toggle{color:#5eead4;cursor:pointer;font-size:.76rem;margin-top:.7rem;display:inline-block;transition:opacity .2s;}
+.auth-toggle:hover{opacity:.7;text-decoration:underline;}
+.auth-err{color:#fca5a5;font-size:.72rem;margin-top:.28rem;min-height:1rem;}
+/* User pill */
 .user-pill{display:flex;align-items:center;gap:.6rem;background:rgba(255,255,255,.15);
   border:1px solid rgba(255,255,255,.3);border-radius:999px;padding:.3rem .9rem .3rem .4rem;}
 .user-avatar{width:26px;height:26px;border-radius:50%;background:var(--accent2);
@@ -791,30 +876,185 @@ nav{position:relative;z-index:10;background:var(--bg2);border-bottom:2px solid v
 </head>
 <body>
 
-<!-- AUTH OVERLAY -->
+<!-- AUTH OVERLAY — Animated Login -->
 <div id="auth-overlay">
+
+  <!-- Scan line -->
+  <div class="scan-line"></div>
+
+  <!-- Floating amino acid sequence ribbons (JS will inject more) -->
+  <div id="aa-ribbons-container"></div>
+
+  <!-- Floating DNA bubbles -->
+  <div id="dna-bubbles-container"></div>
+
+  <!-- Login Card -->
   <div class="auth-card">
+
+    <!-- Characters: girl (medical) + DNA helix + boy (coder) -->
+    <div class="auth-characters">
+
+      <!-- Girl — medical researcher -->
+      <div class="char-wrap left">
+        <svg width="72" height="100" viewBox="0 0 72 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- lab coat body -->
+          <rect x="14" y="52" width="44" height="42" rx="6" fill="#e0f2f1" opacity=".95"/>
+          <!-- coat lapels -->
+          <polygon points="36,52 20,52 26,72" fill="#b2dfdb"/>
+          <polygon points="36,52 52,52 46,72" fill="#b2dfdb"/>
+          <!-- coat pockets -->
+          <rect x="17" y="68" width="10" height="8" rx="2" fill="#b2dfdb"/>
+          <!-- stethoscope -->
+          <path d="M28 60 Q22 70 26 78 Q30 84 34 80" stroke="#0d9488" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <circle cx="34" cy="80" r="3" fill="#0d9488"/>
+          <!-- red cross on pocket -->
+          <rect x="20" y="71" width="4" height="1.5" rx=".5" fill="#e05e3a"/>
+          <rect x="21.5" y="69.5" width="1.5" height="4" rx=".5" fill="#e05e3a"/>
+          <!-- shirt under coat -->
+          <rect x="26" y="52" width="20" height="22" rx="2" fill="#ccfbf1"/>
+          <!-- skirt / pants -->
+          <rect x="16" y="82" width="18" height="16" rx="4" fill="#0d9488" opacity=".8"/>
+          <rect x="38" y="82" width="18" height="16" rx="4" fill="#0d9488" opacity=".8"/>
+          <!-- shoes -->
+          <ellipse cx="25" cy="97" rx="8" ry="3.5" fill="#134e4a"/>
+          <ellipse cx="47" cy="97" rx="8" ry="3.5" fill="#134e4a"/>
+          <!-- neck -->
+          <rect x="31" y="42" width="10" height="12" rx="4" fill="#ffb385"/>
+          <!-- head -->
+          <ellipse cx="36" cy="34" rx="15" ry="16" fill="#ffb385"/>
+          <!-- hair — long dark hair -->
+          <ellipse cx="36" cy="22" rx="15" ry="10" fill="#2d1b0e"/>
+          <rect x="21" y="22" width="6" height="28" rx="3" fill="#2d1b0e"/>
+          <rect x="45" y="22" width="6" height="28" rx="3" fill="#2d1b0e"/>
+          <!-- eyes -->
+          <ellipse cx="30" cy="34" rx="2.5" ry="3" fill="#1a0a00"/>
+          <ellipse cx="42" cy="34" rx="2.5" ry="3" fill="#1a0a00"/>
+          <circle cx="31" cy="33" r=".8" fill="white"/>
+          <circle cx="43" cy="33" r=".8" fill="white"/>
+          <!-- smile -->
+          <path d="M31 41 Q36 45 41 41" stroke="#c0785a" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+          <!-- glasses -->
+          <rect x="26.5" y="31.5" width="8" height="5" rx="2.5" stroke="#0d9488" stroke-width="1.2" fill="rgba(13,148,136,.12)"/>
+          <rect x="37.5" y="31.5" width="8" height="5" rx="2.5" stroke="#0d9488" stroke-width="1.2" fill="rgba(13,148,136,.12)"/>
+          <line x1="34.5" y1="34" x2="37.5" y2="34" stroke="#0d9488" stroke-width="1"/>
+          <!-- clipboard in hand -->
+          <rect x="4" y="60" width="12" height="16" rx="2" fill="#fff" stroke="#0d9488" stroke-width="1"/>
+          <line x1="6" y1="65" x2="14" y2="65" stroke="#0d9488" stroke-width=".8"/>
+          <line x1="6" y1="68" x2="14" y2="68" stroke="#0d9488" stroke-width=".8"/>
+          <line x1="6" y1="71" x2="11" y2="71" stroke="#e05e3a" stroke-width=".8"/>
+          <rect x="8" y="58" width="4" height="4" rx="1" fill="#0d9488"/>
+          <!-- arm holding clipboard -->
+          <path d="M14 62 Q10 62 8 62" stroke="#ffb385" stroke-width="3" stroke-linecap="round" fill="none"/>
+          <path d="M58 64 Q64 64 64 70" stroke="#ffb385" stroke-width="3" stroke-linecap="round" fill="none"/>
+          <!-- molecule floating near -->
+          <circle cx="63" cy="54" r="4" fill="none" stroke="#5eead4" stroke-width="1.2"/>
+          <circle cx="58" cy="46" r="2.5" fill="#5eead4" opacity=".7"/>
+          <circle cx="68" cy="46" r="2.5" fill="#e05e3a" opacity=".7"/>
+          <line x1="63" y1="50" x2="60" y2="48" stroke="#5eead4" stroke-width="1"/>
+          <line x1="63" y1="50" x2="66" y2="48" stroke="#e05e3a" stroke-width="1"/>
+        </svg>
+        <span class="char-label girl">Researcher</span>
+      </div>
+
+      <!-- DNA helix in center -->
+      <div class="dna-helix-center">
+        <div class="helix-rung"><div class="helix-dot" style="background:#5eead4"></div><div class="helix-line"></div><div class="helix-dot" style="background:#e05e3a"></div></div>
+        <div class="helix-rung" style="animation-delay:.3s"><div class="helix-dot" style="background:#e05e3a"></div><div class="helix-line"></div><div class="helix-dot" style="background:#5eead4"></div></div>
+        <div class="helix-rung" style="animation-delay:.6s"><div class="helix-dot" style="background:#93c5fd"></div><div class="helix-line"></div><div class="helix-dot" style="background:#fde68a"></div></div>
+        <div class="helix-rung" style="animation-delay:.9s"><div class="helix-dot" style="background:#fde68a"></div><div class="helix-line"></div><div class="helix-dot" style="background:#93c5fd"></div></div>
+        <div class="helix-rung" style="animation-delay:1.2s"><div class="helix-dot" style="background:#5eead4"></div><div class="helix-line"></div><div class="helix-dot" style="background:#e05e3a"></div></div>
+        <div class="helix-rung" style="animation-delay:1.5s"><div class="helix-dot" style="background:#c084fc"></div><div class="helix-line"></div><div class="helix-dot" style="background:#5eead4"></div></div>
+        <span style="font-family:'Orbitron',monospace;font-size:.38rem;color:rgba(94,234,212,.5);letter-spacing:1px;margin-top:2px;">DNA</span>
+      </div>
+
+      <!-- Boy — coder -->
+      <div class="char-wrap right">
+        <svg width="72" height="100" viewBox="0 0 72 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- hoodie body -->
+          <rect x="12" y="50" width="48" height="44" rx="6" fill="#1e3a5f" opacity=".95"/>
+          <!-- hoodie hood strings -->
+          <line x1="36" y1="50" x2="30" y2="62" stroke="#93c5fd" stroke-width="1.2"/>
+          <line x1="36" y1="50" x2="42" y2="62" stroke="#93c5fd" stroke-width="1.2"/>
+          <!-- kangaroo pocket -->
+          <rect x="24" y="68" width="24" height="14" rx="4" fill="#162d4a"/>
+          <!-- code text on hoodie -->
+          <text x="17" y="62" font-family="monospace" font-size="5" fill="#93c5fd" opacity=".85">&lt;/code&gt;</text>
+          <!-- jeans -->
+          <rect x="14" y="82" width="18" height="16" rx="4" fill="#1d4ed8" opacity=".9"/>
+          <rect x="40" y="82" width="18" height="16" rx="4" fill="#1d4ed8" opacity=".9"/>
+          <!-- sneakers -->
+          <ellipse cx="23" cy="97" rx="9" ry="3.5" fill="#f8fafc"/>
+          <ellipse cx="49" cy="97" rx="9" ry="3.5" fill="#f8fafc"/>
+          <rect x="15" y="94" width="16" height="4" rx="2" fill="#e2e8f0"/>
+          <rect x="41" y="94" width="16" height="4" rx="2" fill="#e2e8f0"/>
+          <!-- neck -->
+          <rect x="30" y="40" width="12" height="12" rx="4" fill="#f5c09a"/>
+          <!-- head -->
+          <ellipse cx="36" cy="32" rx="16" ry="16" fill="#f5c09a"/>
+          <!-- short hair -->
+          <ellipse cx="36" cy="19" rx="16" ry="9" fill="#1a0a00"/>
+          <rect x="20" y="19" width="32" height="8" rx="2" fill="#1a0a00"/>
+          <!-- eyes -->
+          <ellipse cx="29.5" cy="32" rx="2.5" ry="2.8" fill="#1a0a00"/>
+          <ellipse cx="42.5" cy="32" rx="2.5" ry="2.8" fill="#1a0a00"/>
+          <circle cx="30.5" cy="31" r=".8" fill="white"/>
+          <circle cx="43.5" cy="31" r=".8" fill="white"/>
+          <!-- focused expression / slight smirk -->
+          <path d="M31 40 Q36 43 40 40" stroke="#c07850" stroke-width="1.3" fill="none" stroke-linecap="round"/>
+          <!-- headphones -->
+          <path d="M20 27 Q20 14 36 14 Q52 14 52 27" stroke="#0d9488" stroke-width="2.5" fill="none"/>
+          <rect x="16" y="26" width="7" height="10" rx="3" fill="#0d9488"/>
+          <rect x="49" y="26" width="7" height="10" rx="3" fill="#0d9488"/>
+          <!-- laptop in lap / arm extended -->
+          <path d="M58 62 Q64 62 64 68" stroke="#f5c09a" stroke-width="3" stroke-linecap="round" fill="none"/>
+          <rect x="54" y="66" width="16" height="10" rx="2" fill="#1e293b"/>
+          <rect x="55" y="67" width="14" height="7" rx="1" fill="#0f172a"/>
+          <!-- code on screen -->
+          <line x1="56" y1="69" x2="62" y2="69" stroke="#5eead4" stroke-width=".6"/>
+          <line x1="56" y1="71" x2="65" y2="71" stroke="#93c5fd" stroke-width=".6"/>
+          <line x1="56" y1="73" x2="60" y2="73" stroke="#fde68a" stroke-width=".6"/>
+          <!-- cursor blink on screen -->
+          <rect x="60" y="72.5" width="1.2" height="2" rx=".4" fill="#5eead4" opacity=".9">
+            <animate attributeName="opacity" values="0;1;0" dur="1s" repeatCount="indefinite"/>
+          </rect>
+          <!-- arm holding laptop -->
+          <path d="M14 62 Q8 64 8 70" stroke="#f5c09a" stroke-width="3" stroke-linecap="round" fill="none"/>
+          <!-- floating quantum symbol -->
+          <circle cx="8" cy="44" r="5" fill="none" stroke="#e05e3a" stroke-width="1.2" stroke-dasharray="2,2"/>
+          <text x="5.5" y="47.5" font-family="monospace" font-size="6" fill="#e05e3a" opacity=".8">ψ</text>
+        </svg>
+        <span class="char-label boy">Developer</span>
+      </div>
+    </div>
+
     <div class="auth-logo">QUANTUM AI PROTEIN</div>
     <div class="auth-sub">Folding Solver · Sign in to continue</div>
 
+    <!-- Login form -->
     <div id="auth-login-form">
       <input class="auth-input" id="login-email" type="email" placeholder="Email address">
       <input class="auth-input" id="login-password" type="password" placeholder="Password">
-      <button class="btn-auth" onclick="signIn()">SIGN IN</button>
-      <button class="btn-auth-ghost" onclick="signInGoogle()">Continue with Google</button>
+      <button class="btn-auth" onclick="signIn()">⚛ SIGN IN</button>
+      <div class="auth-divider"><span>or</span></div>
+      <button class="btn-auth-ghost" onclick="signInGoogle()">
+        <svg width="17" height="17" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.08 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-3.59-13.46-8.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+        Continue with Google
+      </button>
       <div class="auth-err" id="login-err"></div>
       <div class="auth-toggle" onclick="toggleAuthMode()">No account? Register →</div>
     </div>
 
+    <!-- Register form -->
     <div id="auth-register-form" style="display:none">
       <input class="auth-input" id="reg-email" type="email" placeholder="Email address">
       <input class="auth-input" id="reg-password" type="password" placeholder="Password (min 6 chars)">
-      <button class="btn-auth" onclick="register()">CREATE ACCOUNT</button>
+      <button class="btn-auth" onclick="register()">🧬 CREATE ACCOUNT</button>
       <div class="auth-err" id="reg-err"></div>
       <div class="auth-toggle" onclick="toggleAuthMode()">← Back to sign in</div>
     </div>
   </div>
 </div>
+
 
 <!-- Particle canvas background -->
 <canvas id="particles"></canvas>
@@ -1305,6 +1545,61 @@ async function signInGoogle(){
 }
 
 function signOut(){ fbAuth.signOut(); }
+
+// ── LOGIN PAGE ANIMATIONS ──
+(function(){
+  const AA_SEQS = [
+    'ACDEFGHIKLMNPQRSTVWY','GIVEQCCTSICSLYQLENYCN',
+    'DAEFRHDSGYEVHHQKLVFF','MSKGEELFTGVVPILVELDGD',
+    'AELMAELMAELMAELM',    'CFIVWYCFIVWYCFIVWY',
+    'PQITLWQRPLVTIKIGGQLK','ACGTVWMFILNQKRHDE',
+    'HELIX·SHEET·COIL·TURN','VQE·AI·FOLD·ENERGY',
+    'QUANTUM·PROTEIN·DNA', 'AMINO·ACID·CHAIN·3D',
+  ];
+  const COLORS = ['#5eead4','#93c5fd','#fde68a','#c084fc','#86efac','#fb923c','#67e8f9'];
+
+  const overlay = document.getElementById('auth-overlay');
+  const ribbonContainer = document.getElementById('aa-ribbons-container');
+  const bubbleContainer = document.getElementById('dna-bubbles-container');
+
+  // Spawn floating ribbons
+  function spawnRibbon(){
+    if(!overlay || overlay.style.display === 'none') return;
+    const el = document.createElement('div');
+    el.className = 'aa-ribbon';
+    const seq   = AA_SEQS[Math.floor(Math.random()*AA_SEQS.length)];
+    const color = COLORS[Math.floor(Math.random()*COLORS.length)];
+    const left  = Math.random()*95;
+    const dur   = 14 + Math.random()*18;
+    const drift = (Math.random()-0.5)*120;
+    const delay = Math.random()*8;
+    el.textContent = seq;
+    el.style.cssText = `left:${left}%;top:105%;color:${color};opacity:0;--drift:${drift}px;animation-duration:${dur}s;animation-delay:${delay}s;`;
+    ribbonContainer && ribbonContainer.appendChild(el);
+    setTimeout(()=>el.remove(), (dur+delay)*1000+500);
+  }
+
+  // Spawn DNA bubbles
+  function spawnBubble(){
+    if(!overlay || overlay.style.display === 'none') return;
+    const el = document.createElement('div');
+    el.className = 'dna-bubble';
+    const size  = 6 + Math.random()*18;
+    const color = COLORS[Math.floor(Math.random()*COLORS.length)];
+    const left  = Math.random()*96;
+    const top   = 5 + Math.random()*88;
+    const dur   = 4 + Math.random()*6;
+    const delay = Math.random()*4;
+    el.style.cssText = `width:${size}px;height:${size}px;left:${left}%;top:${top}%;background:${color};opacity:${.07+Math.random()*.12};animation-duration:${dur}s;animation-delay:${delay}s;`;
+    bubbleContainer && bubbleContainer.appendChild(el);
+  }
+
+  // Initial bubbles
+  for(let i=0;i<28;i++) spawnBubble();
+  // Continuously spawn ribbons
+  for(let i=0;i<6;i++) setTimeout(spawnRibbon, i*2200);
+  setInterval(spawnRibbon, 2800);
+})();
 </script>
 
 <script>
