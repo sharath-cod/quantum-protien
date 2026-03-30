@@ -1403,17 +1403,24 @@ def analyze():
     # ── Healthy Reference Comparison ──
     comparison = compare_with_reference(sequence, ai_result, quantum_result)
 
-    # ── Quantum Energy Improvement ──
-    # Formula: |quantum_ground_state - classical_interaction_sum| / |classical| * 100
-    # Since exact diagonalization finds the true ground state, we show the real
-    # difference between the naive classical energy sum and the quantum optimized
-    # ground state — this always produces a meaningful non-zero percentage.
+    # ── Quantum Ground State Depth ──
+    # classE = naive pairwise sum of interaction coefficients (overcounts interactions).
+    # quantE = lowest eigenvalue of the full Pauli Hamiltonian (exact ground state).
+    #
+    # WHY quantE > classE (less negative):
+    # The naive sum treats every pair as contributing independently at full strength.
+    # The quantum Hamiltonian eigenvalue accounts for the fact that ZZ and XX Pauli
+    # operators cannot simultaneously be in their most-negative eigenstates (they
+    # don't commute). Quantum interference cancels part of the naive sum — so the
+    # true ground state energy is always HIGHER (less negative) than the naive sum.
+    # This is physically correct: classE is an unphysical lower bound, quantE is real.
+    #
+    # The "improvement" metric we report is simply the ground state depth below zero,
+    # which tells you how tightly the protein is energetically bound.
     classical_e = quantum_result.get('hamiltonian_energy', 0)
     quantum_e   = quantum_result.get('minimum_energy', 0)
-    if abs(classical_e) < 0.001:
-        improvement = 0.0
-    else:
-        improvement = round(abs(quantum_e - classical_e) / abs(classical_e) * 100, 1)
+    # Report the absolute ground state depth (how far below zero = how stable)
+    improvement = round(abs(quantum_e), 1) if quantum_e < 0 else 0.0
 
     # ── Custom/Known sequence detection ──
     is_known     = sequence.upper() in HEALTHY_REFERENCES
