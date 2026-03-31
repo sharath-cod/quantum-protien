@@ -458,10 +458,12 @@ def build_protein_hamiltonian(valid_sequence):
                 classical_energy += coeff
 
             # Hydrogen bond (polar-polar)
+            # XX is a purely quantum off-diagonal operator — it has no classical diagonal energy.
+            # We do NOT add its coefficient to classical_energy; only ZZ (diagonal) terms count.
             if not h1 and not h2 and c1 == 0 and c2 == 0:
                 coeff = -0.8 * w
                 add_xx(q1, q2, coeff)
-                classical_energy += coeff
+                # classical_energy intentionally NOT updated here
 
     # Add a small identity term so the Hamiltonian is never empty
     pauli_list.append(('I' * num_qubits, 0.0))
@@ -1411,14 +1413,17 @@ def analyze():
     comparison = compare_with_reference(sequence, ai_result, quantum_result)
 
     # ── Quantum Energy Improvement ──
-    # Improvement = how much MORE negative (lower) the quantum ground state is vs classical estimate.
-    # Classical (hamiltonian_energy) is computed without optimization; quantum (minimum_energy) is
-    # the exact diagonalized ground state — always ≤ classical. Improvement is positive when quantum < classical.
-    classical_e  = quantum_result.get('hamiltonian_energy', 0)
-    quantum_e    = quantum_result.get('minimum_energy', 0)
+    # The quantum ground state (minimum_energy) is found by exact Hamiltonian diagonalization.
+    # It is ALWAYS ≤ classical_energy because quantum effects (off-diagonal XX terms / tunneling)
+    # allow the system to explore lower-energy configurations unreachable classically.
+    # Improvement = how much more negative (lower) the quantum minimum is vs the classical estimate.
+    # Formula: (classical − quantum) / |classical| × 100  → always ≥ 0
+    classical_e = quantum_result.get('hamiltonian_energy', 0)
+    quantum_e   = quantum_result.get('minimum_energy', 0)
     if abs(classical_e) > 0.001:
+        # quantum_e ≤ classical_e, so (classical_e - quantum_e) ≥ 0
         raw_improvement = (classical_e - quantum_e) / abs(classical_e) * 100
-        improvement = round(raw_improvement, 1)
+        improvement = round(max(0.0, raw_improvement), 1)   # clamp to ≥ 0 for safety
     else:
         improvement = 0.0
 
