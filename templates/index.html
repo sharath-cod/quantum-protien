@@ -1843,10 +1843,11 @@ async function analyze(){
     }
 
     currentResult = data;
+    autoSaveResult(data, name, seq);   // ← persist to localStorage
     setPipeline(4);
     switchTab('results');
     setTimeout(function(){ renderResults(data); }, 80);
-    toast('✅ Analysis complete!');
+    toast('✅ Analysis complete — saved locally!');
 
   } catch(err){
     clearInterval(stepInterval);
@@ -2424,43 +2425,105 @@ function setVizMode(mode){
 }
 
 // ─────────────────────────────────────────────
-// SAVED RESULTS
+// SAVED RESULTS  (localStorage — no backend needed)
 // ─────────────────────────────────────────────
-async function loadSaved(){
+const LS_KEY = 'qpf_saved_analyses';
+
+function getSavedList(){
+  try{ return JSON.parse(localStorage.getItem(LS_KEY) || '[]'); }
+  catch(e){ return []; }
+}
+
+function setSavedList(arr){
+  localStorage.setItem(LS_KEY, JSON.stringify(arr));
+}
+
+/** Call this right after a successful /api/analyze response */
+function autoSaveResult(data, name, sequence){
+  const list = getSavedList();
+  const entry = {
+    id:               Date.now() + '_' + Math.random().toString(36).slice(2,7),
+    name:             name || 'Unnamed Protein',
+    sequence:         sequence,
+    length:           data.ai_result?.length ?? sequence.length,
+    dominant_structure: data.ai_result?.dominant_structure
+                      || data.final?.dominant_structure
+                      || '-',
+    stability:        data.final?.stability
+                      || data.ai_result?.stability
+                      || '-',
+    energy:           data.final?.minimum_energy
+                      ?? data.quantum_result?.minimum_energy
+                      ?? null,
+    risk_level:       data.disease_risk?.risk_level || '-',
+    fold_topology:    data.final?.fold_topology || '-',
+    confidence:       data.final?.confidence ?? data.ai_result?.confidence ?? null,
+    created_at:       new Date().toISOString(),
+  };
+  // Avoid exact-duplicate sequences
+  const deduped = list.filter(r => r.sequence !== sequence);
+  deduped.unshift(entry);           // newest first
+  setSavedList(deduped.slice(0, 50)); // keep max 50
+}
+
+function loadSaved(){
   const grid = document.getElementById('saved-grid');
-  grid.innerHTML = '<div style="color:var(--dim);padding:2rem;">Loading...</div>';
-  try{
-    const token = await getToken();
-    const res  = await fetch('/api/results', {
-      headers:{'Authorization':'Bearer '+token}
-    });
-    const data = await res.json();
-    if(!data.length){
-      grid.innerHTML='<div style="color:var(--dim);padding:3rem;text-align:center;">🧬 No saved analyses yet.<br>Run an analysis first!</div>';
-      return;
-    }
-    grid.innerHTML = data.map(r=>`
+  const list = getSavedList();
+
+  if(!list.length){
+    grid.innerHTML = `
+      <div style="color:var(--dim);padding:3rem;text-align:center;grid-column:1/-1;">
+        🧬 No saved analyses yet.<br>
+        <span style="font-size:.82rem;">Run an analysis — results are saved automatically!</span>
+      </div>`;
+    return;
+  }
+
+  const riskColor = { High:'#dc2626', Moderate:'#d97706', Low:'#059669', Healthy:'#059669' };
+
+  grid.innerHTML = list.map(r => {
+    const energyStr = (r.energy !== null && r.energy !== undefined)
+      ? Number(r.energy).toFixed(3) + ' eV' : '-';
+    const confStr = (r.confidence !== null && r.confidence !== undefined)
+      ? Number(r.confidence).toFixed(1) + '%' : '-';
+    const dateStr = r.created_at
+      ? new Date(r.created_at).toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'})
+      : '-';
+    const rc = riskColor[r.risk_level] || 'var(--dim)';
+    // Escape for safe inline onclick attr
+    const safeSeq  = r.sequence.replace(/'/g,"\\'");
+    const safeName = (r.name||'').replace(/'/g,"\\'");
+
+    return `
       <div class="saved-card">
         <div class="sc-head">
-          <span class="sc-name">${r.name||'Unnamed'}</span>
-          <span class="sc-badge">${r.length} aa</span>
+          <span class="sc-name">${escHtml(r.name||'Unnamed')}</span>
+          <span class="sc-badge">${r.length ?? '?'} aa</span>
         </div>
-        <div class="sc-seq">${r.sequence}</div>
+        <div class="sc-seq" title="${escHtml(r.sequence)}">${escHtml(r.sequence)}</div>
         <div class="sc-info">
-          <p>🧬 Structure: ${r.final?.dominant_structure||'-'}</p>
-          <p>⚡ Min Energy: ${r.energy?.toFixed(3)||'-'} eV</p>
-          <p>🔒 Stability: ${r.final?.stability||'-'}</p>
-          <p>📅 ${new Date(r.created_at).toLocaleDateString()}</p>
+          <p>🧬 Structure: <strong>${escHtml(r.dominant_structure)}</strong></p>
+          <p>⚡ Min Energy: <strong>${energyStr}</strong></p>
+          <p>🔒 Stability: <strong>${escHtml(r.stability)}</strong></p>
+          <p>🎯 Fold: <strong>${escHtml(r.fold_topology)}</strong></p>
+          <p>🧪 Confidence: <strong>${confStr}</strong></p>
+          <p style="color:${rc};">⚕ Risk: <strong>${escHtml(r.risk_level)}</strong></p>
+          <p style="color:var(--dim);font-size:.7rem;">📅 ${dateStr}</p>
         </div>
         <div class="sc-btns">
-          <button class="btn-load" onclick="loadSavedSeq('${r.sequence}','${r.name}')">📂 Load</button>
+          <button class="btn-load" onclick="loadSavedSeq('${safeSeq}','${safeName}')">📂 Load</button>
           <button class="btn-del"  onclick="deleteSaved('${r.id}')">🗑 Delete</button>
         </div>
-      </div>
-    `).join('');
-  }catch(e){
-    grid.innerHTML='<div style="color:var(--red);">Failed to load results</div>';
-  }
+      </div>`;
+  }).join('');
+}
+
+function escHtml(str){
+  return String(str||'-')
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;');
 }
 
 function loadSavedSeq(seq, name){
@@ -2471,10 +2534,10 @@ function loadSavedSeq(seq, name){
   toast('📂 Sequence loaded! Click Analyze to re-run.');
 }
 
-async function deleteSaved(id){
-  if(!confirm('Delete this analysis?')) return;
-  const token = await getToken();
-  await fetch(`/api/results/${id}`, {method:'DELETE', headers:{'Authorization':'Bearer '+token}});
+function deleteSaved(id){
+  if(!confirm('Delete this saved analysis?')) return;
+  const list = getSavedList().filter(r => r.id !== id);
+  setSavedList(list);
   loadSaved();
   toast('🗑 Deleted');
 }
