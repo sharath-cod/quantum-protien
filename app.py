@@ -5,6 +5,7 @@ import math
 import random
 import time
 import numpy as np
+import anthropic
 
 # Pre-import Qiskit at startup (avoids slow reimport on every request)
 try:
@@ -47,6 +48,14 @@ else:
 firebase_admin.initialize_app(cred)
 db = firestore.client()
 COLLECTION = "protein_results"
+
+# ─────────────────────────────────────────────────────
+# ANTHROPIC (CLAUDE) CLIENT
+# Set ANTHROPIC_API_KEY in your environment or .env file
+# ─────────────────────────────────────────────────────
+anthropic_client = anthropic.Anthropic(
+    api_key=os.environ.get("ANTHROPIC_API_KEY", "")
+)
 
 
 # ─────────────────────────────────────────────────────
@@ -467,7 +476,7 @@ def build_protein_hamiltonian(valid_sequence):
     pauli_list.append(('I' * num_qubits, 0.0))
 
     hamiltonian = SparsePauliOp.from_list(pauli_list)
-    return hamiltonian, round(abs(classical_energy), 4), num_qubits
+    return hamiltonian, round(classical_energy, 4), num_qubits
 
 
 def build_ansatz(num_qubits, reps=2):
@@ -693,7 +702,7 @@ def _fallback_vqe(sequence):
 
     return {
         'num_qubits':                  num_qubits,
-        'hamiltonian_energy':          round(abs(hamiltonian_energy), 4),
+        'hamiltonian_energy':          round(hamiltonian_energy, 4),
         'minimum_energy':              round(hamiltonian_energy, 4),
         'vqe_iterations':              iterations,
         'quantum_state_probabilities': probabilities,
@@ -1414,15 +1423,13 @@ def analyze():
     # Improvement = how much MORE negative (lower) the quantum ground state is vs classical estimate.
     # Classical (hamiltonian_energy) is computed without optimization; quantum (minimum_energy) is
     # the exact diagonalized ground state — always ≤ classical. Improvement is positive when quantum < classical.
-    classical_e = quantum_result.get('hamiltonian_energy', 0)   # always positive now
-    quantum_e   = quantum_result.get('minimum_energy', 0)        # can be negative (lower energy)
+    classical_e  = quantum_result.get('hamiltonian_energy', 0)
+    quantum_e    = quantum_result.get('minimum_energy', 0)
     if abs(classical_e) > 0.001:
-        # classical_e is positive; quantum_e is <= classical_e (more stable, often negative)
-        # improvement = how much lower the quantum result is, as a % of classical baseline
-        raw_improvement = (classical_e - quantum_e) / classical_e * 100
-        improvement = round(max(0.1, raw_improvement), 1)
+        raw_improvement = (classical_e - quantum_e) / abs(classical_e) * 100
+        improvement = round(raw_improvement, 1)
     else:
-        improvement = round(max(0.1, abs(quantum_e) * 10), 1)
+        improvement = 0.0
 
     # ── Custom/Known sequence detection ──
     is_known     = sequence.upper() in HEALTHY_REFERENCES
@@ -1500,15 +1507,24 @@ def get_results():
     out = []
     for doc in docs:
         d = doc.to_dict()
+        # Safely convert Firestore SERVER_TIMESTAMP to ISO string JS can parse
+        ts = d.get('created_at')
+        try:
+            created_iso = ts.isoformat() if ts else None
+        except Exception:
+            created_iso = str(ts) if ts else None
+
         out.append({
-            'id':         doc.id,
-            'name':       d.get('name'),
-            'sequence':   d.get('sequence'),
-            'length':     d.get('length'),
-            'energy':     d.get('energy'),
-            'final':      d.get('final_structure', {}),
+            'id':           doc.id,
+            'name':         d.get('name'),
+            'sequence':     d.get('sequence'),
+            'length':       d.get('length'),
+            'energy':       d.get('energy'),
+            'final':        d.get('final_structure') or {},
             'has_unknowns': d.get('has_unknowns', False),
-            'created_at': str(d.get('created_at')),
+            'created_at':   created_iso,
+            'risk_level':   (d.get('disease_risk') or {}).get('risk_level', '-'),
+            'dominant_structure': (d.get('ai_result') or {}).get('dominant_structure', '-'),
         })
     return jsonify(out)
 
@@ -1637,6 +1653,141 @@ def get_examples():
          'desc': 'Contains ambiguous IUPAC codes — tests normalization',
          'tag': 'demo'},
     ])
+
+
+@app.route('/api/ai-explain', methods=['POST'])
+def ai_explain():
+    """
+    Gen AI (Claude) plain-English expert summary of the protein analysis.
+    Accepts the full analysis result and returns a structured narrative.
+    """
+    decoded = verify_token(request)
+    if not decoded:
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    data = request.get_json()
+    ai_result      = data.get('ai_result', {})
+    quantum_result = data.get('quantum_result', {})
+    final          = data.get('final', {})
+    disease_risk   = data.get('disease_risk', {})
+    name           = data.get('name', 'Unknown Protein')
+    sequence       = data.get('sequence', '')
+
+    if not sequence:
+        return jsonify({'error': 'No sequence provided'}), 400
+
+    if not os.environ.get("ANTHROPIC_API_KEY"):
+        return jsonify({'error': 'ANTHROPIC_API_KEY not configured on server'}), 503
+
+    prompt = f"""You are an expert structural biologist and bioinformatician.
+A user has submitted a protein sequence for quantum AI analysis. Below are the computed results.
+Write a clear, engaging, expert-level but human-readable explanation in 4 sections:
+
+**1. Structural Summary** — Explain the dominant secondary structure ({final.get('dominant_structure','-')}),
+fold topology ({final.get('fold_topology','-')}), and what that means functionally.
+
+**2. Stability & Energy** — Interpret the instability index ({ai_result.get('instability_index','-')}),
+stability label ({final.get('stability','-')}), and quantum minimum energy ({final.get('minimum_energy','-')} eV).
+What does this mean for the protein's behaviour in a cell?
+
+**3. Disease Risk Assessment** — Risk level is {disease_risk.get('risk_level','-')} (score {disease_risk.get('risk_score',0)}/100).
+Triggered diseases: {', '.join(d['disease'] for d in disease_risk.get('diseases',[])[:3]) or 'None detected'}.
+Explain the biochemical reasoning behind these associations.
+
+**4. Key Recommendations** — Give 2–3 concrete next steps a researcher should take based on these results
+(e.g. specific assays, mutations to test, literature to consult).
+
+Protein name: {name}
+Sequence: {sequence[:80]}{'...' if len(sequence)>80 else ''}
+Length: {ai_result.get('length','-')} amino acids
+Hydrophobicity: {ai_result.get('hydrophobic_ratio','-')}%
+Alpha Helix confidence: {ai_result.get('confidence_scores',{}).get('Alpha Helix','-')}%
+Beta Sheet confidence: {ai_result.get('confidence_scores',{}).get('Beta Sheet','-')}%
+Molecular weight: {ai_result.get('molecular_weight','-')} Da
+Isoelectric point: {ai_result.get('isoelectric_point','-')}
+Qubits used: {quantum_result.get('num_qubits','-')}
+
+Write in plain English. Use markdown bold for section headers. Keep each section 2–4 sentences.
+Do not repeat raw numbers unless they add insight. Do not add a preamble or closing sign-off."""
+
+    try:
+        message = anthropic_client.messages.create(
+            model="claude-sonnet-4-20250514",
+            max_tokens=1024,
+            messages=[{"role": "user", "content": prompt}]
+        )
+        explanation = message.content[0].text
+        return jsonify({'success': True, 'explanation': explanation})
+    except anthropic.AuthenticationError:
+        return jsonify({'error': 'Invalid ANTHROPIC_API_KEY. Check server configuration.'}), 503
+    except Exception as e:
+        return jsonify({'error': f'AI explanation failed: {str(e)}'}), 500
+
+
+@app.route('/api/ai-chat', methods=['POST'])
+def ai_chat():
+    """
+    Conversational Gen AI Q&A about the protein analysis.
+    Accepts the analysis context + conversation history.
+    Streams back a single-turn response.
+    """
+    decoded = verify_token(request)
+    if not decoded:
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    data     = request.get_json()
+    question = data.get('question', '').strip()
+    context  = data.get('context', {})   # { ai_result, quantum_result, final, disease_risk, name, sequence }
+    history  = data.get('history', [])   # [ {role, content}, ... ]
+
+    if not question:
+        return jsonify({'error': 'No question provided'}), 400
+    if not os.environ.get("ANTHROPIC_API_KEY"):
+        return jsonify({'error': 'ANTHROPIC_API_KEY not configured on server'}), 503
+
+    ai_result      = context.get('ai_result', {})
+    quantum_result = context.get('quantum_result', {})
+    final          = context.get('final', {})
+    disease_risk   = context.get('disease_risk', {})
+    name           = context.get('name', 'Unknown Protein')
+    sequence       = context.get('sequence', '')
+
+    system_prompt = f"""You are an expert structural biologist and bioinformatician assistant embedded in a Quantum AI Protein Folding Analyzer.
+The user is asking questions about the following protein analysis result:
+
+Protein: {name}
+Sequence: {sequence[:80]}{'...' if len(sequence)>80 else ''}
+Length: {ai_result.get('length','-')} aa | MW: {ai_result.get('molecular_weight','-')} Da | pI: {ai_result.get('isoelectric_point','-')}
+Hydrophobicity: {ai_result.get('hydrophobic_ratio','-')}% | Instability Index: {ai_result.get('instability_index','-')}
+Dominant Structure: {final.get('dominant_structure','-')} | Fold: {final.get('fold_topology','-')}
+Stability: {final.get('stability','-')} | Min Energy: {final.get('minimum_energy','-')} eV
+Risk Level: {disease_risk.get('risk_level','-')} ({disease_risk.get('risk_score',0)}/100)
+Triggered diseases: {', '.join(d['disease'] for d in disease_risk.get('diseases',[])[:3]) or 'None'}
+Alpha Helix: {ai_result.get('confidence_scores',{}).get('Alpha Helix','-')}% | Beta Sheet: {ai_result.get('confidence_scores',{}).get('Beta Sheet','-')}%
+
+Answer questions clearly and concisely. If asked something outside protein biology, politely redirect.
+Keep answers under 150 words unless a detailed explanation is explicitly requested.
+Use markdown for any lists or emphasis."""
+
+    messages = []
+    for h in history[-8:]:   # keep last 8 turns for context
+        if h.get('role') in ('user', 'assistant') and h.get('content'):
+            messages.append({'role': h['role'], 'content': h['content']})
+    messages.append({'role': 'user', 'content': question})
+
+    try:
+        message = anthropic_client.messages.create(
+            model="claude-sonnet-4-20250514",
+            max_tokens=512,
+            system=system_prompt,
+            messages=messages
+        )
+        answer = message.content[0].text
+        return jsonify({'success': True, 'answer': answer})
+    except anthropic.AuthenticationError:
+        return jsonify({'error': 'Invalid ANTHROPIC_API_KEY. Check server configuration.'}), 503
+    except Exception as e:
+        return jsonify({'error': f'AI chat failed: {str(e)}'}), 500
 
 
 if __name__ == '__main__':
