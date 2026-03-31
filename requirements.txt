@@ -6,4 +6,4 @@ numpy
 scipy
 qiskit==1.1.0
 qiskit-aer==0.14.2
-anthropic 
+google-generativeai
