@@ -569,7 +569,7 @@ nav{position:relative;z-index:10;background:var(--bg2);border-bottom:2px solid v
   position:fixed;inset:0;z-index:2000;
   display:flex;align-items:center;justify-content:center;
   overflow:hidden;
-  background:linear-gradient(135deg,#020c14 0%,#051a2e 25%,#0a2a1a 50%,#0d1f3c 75%,#050f1a 100%);
+  background:linear-gradient(135deg,#d0f0ee 0%,#e6f7f7 25%,#f0fafa 50%,#e0f5f5 75%,#d0eeee 100%);
   background-size:400% 400%;
   animation:bgShift 12s ease infinite;
 }
@@ -581,16 +581,18 @@ nav{position:relative;z-index:10;background:var(--bg2);border-bottom:2px solid v
 .aa-ribbon{
   position:absolute;font-family:'Orbitron',monospace;font-size:.7rem;
   letter-spacing:3px;pointer-events:none;white-space:nowrap;opacity:0;
+  color:rgba(13,148,136,.35);
   animation:ribbonFloat linear infinite;
 }
 @keyframes ribbonFloat{
   0%{opacity:0;transform:translateY(100vh) translateX(0);}
-  8%{opacity:.5;}
-  92%{opacity:.5;}
+  8%{opacity:.6;}
+  92%{opacity:.6;}
   100%{opacity:0;transform:translateY(-12vh) translateX(var(--drift,20px));}
 }
 .dna-bubble{
   position:absolute;border-radius:50%;pointer-events:none;
+  background:rgba(13,148,136,.08);border:1px solid rgba(13,148,136,.18);
   animation:bubbleDrift ease-in-out infinite;
 }
 @keyframes bubbleDrift{
@@ -599,16 +601,16 @@ nav{position:relative;z-index:10;background:var(--bg2);border-bottom:2px solid v
 }
 .scan-line{
   position:absolute;left:0;right:0;height:1px;
-  background:linear-gradient(90deg,transparent,rgba(13,148,136,.55),rgba(224,94,58,.35),rgba(13,148,136,.55),transparent);
+  background:linear-gradient(90deg,transparent,rgba(13,148,136,.3),rgba(224,94,58,.2),rgba(13,148,136,.3),transparent);
   animation:scanMove 7s linear infinite;pointer-events:none;
 }
 @keyframes scanMove{from{top:-1px;}to{top:100vh;}}
 .auth-card{
   position:relative;z-index:10;width:430px;max-width:94vw;
-  background:rgba(5,18,30,.85);
-  border:1px solid rgba(13,148,136,.3);border-radius:22px;
+  background:rgba(255,255,255,.92);
+  border:1px solid rgba(13,148,136,.25);border-radius:22px;
   padding:2.2rem 2.4rem 1.8rem;
-  box-shadow:0 0 0 1px rgba(13,148,136,.08),0 32px 80px rgba(0,0,0,.65),0 0 55px rgba(13,148,136,.07),inset 0 1px 0 rgba(255,255,255,.05);
+  box-shadow:0 0 0 1px rgba(13,148,136,.08),0 32px 80px rgba(13,148,136,.12),0 0 55px rgba(13,148,136,.06),inset 0 1px 0 rgba(255,255,255,.9);
   backdrop-filter:blur(20px);
   animation:cardIn .7s cubic-bezier(.34,1.56,.64,1) both;
 }
@@ -626,33 +628,33 @@ nav{position:relative;z-index:10;background:var(--bg2);border-bottom:2px solid v
 .char-wrap.right{animation-delay:.9s;}
 .char-wrap svg{filter:drop-shadow(0 5px 14px rgba(13,148,136,.45));}
 @keyframes charBob{0%,100%{transform:translateY(0);}50%{transform:translateY(-9px);}}
-.char-label{font-family:'Exo 2',sans-serif;font-size:.55rem;letter-spacing:1.5px;text-transform:uppercase;opacity:.6;}
-.char-label.girl{color:#5eead4;}
-.char-label.boy{color:#93c5fd;}
+.char-label{font-family:'Exo 2',sans-serif;font-size:.55rem;letter-spacing:1.5px;text-transform:uppercase;opacity:.7;}
+.char-label.girl{color:#0d9488;}
+.char-label.boy{color:#3b82f6;}
 .dna-helix-center{position:absolute;left:50%;top:8px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:4px;}
 .helix-rung{display:flex;align-items:center;gap:3px;animation:helixPulse 2.4s ease-in-out infinite;}
 .helix-rung:nth-child(odd){animation-direction:reverse;}
 @keyframes helixPulse{0%,100%{opacity:.5;transform:scaleX(1);}50%{opacity:1;transform:scaleX(1.3);}}
 .helix-dot{width:5px;height:5px;border-radius:50%;}
-.helix-line{width:20px;height:1px;background:rgba(13,148,136,.35);}
+.helix-line{width:20px;height:1px;background:rgba(13,148,136,.45);}
 .auth-logo{
   font-family:'Orbitron',monospace;font-size:1rem;font-weight:900;text-align:center;
-  background:linear-gradient(90deg,#5eead4,#ffffff 45%,#fdba74 75%,#5eead4);
+  background:linear-gradient(90deg,#0d9488,#134e4a 45%,#e05e3a 75%,#0d9488);
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;
   background-size:250% 100%;animation:logoShimmer 4s linear infinite;
   margin-bottom:.2rem;letter-spacing:.8px;
 }
 @keyframes logoShimmer{to{background-position:-250% 0;}}
-.auth-sub{font-size:.62rem;color:rgba(148,200,190,.58);letter-spacing:2.5px;text-transform:uppercase;text-align:center;margin-bottom:1.4rem;}
+.auth-sub{font-size:.62rem;color:rgba(13,100,90,.55);letter-spacing:2.5px;text-transform:uppercase;text-align:center;margin-bottom:1.4rem;}
 .auth-divider{display:flex;align-items:center;gap:.6rem;margin:.65rem 0;}
-.auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:rgba(13,148,136,.18);}
-.auth-divider span{font-size:.62rem;color:rgba(148,200,190,.4);letter-spacing:2px;}
+.auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:rgba(13,148,136,.22);}
+.auth-divider span{font-size:.62rem;color:rgba(13,100,90,.45);letter-spacing:2px;}
 .auth-input{
-  width:100%;background:rgba(13,148,136,.07);border:1px solid rgba(13,148,136,.22);
-  color:#d1faf5;padding:.72rem 1rem;border-radius:10px;
+  width:100%;background:var(--bg3);border:1px solid rgba(13,148,136,.28);
+  color:var(--text);padding:.72rem 1rem;border-radius:10px;
   font-family:'Exo 2',sans-serif;font-size:.87rem;margin-bottom:.62rem;outline:none;transition:border .2s,box-shadow .2s;
 }
-.auth-input::placeholder{color:rgba(148,200,190,.32);}
+.auth-input::placeholder{color:rgba(13,100,90,.38);}
 .auth-input:focus{border-color:#0d9488;box-shadow:0 0 0 3px rgba(13,148,136,.14);}
 .btn-auth{
   width:100%;background:linear-gradient(135deg,#0f766e 0%,#0d9488 45%,#e05e3a 100%);
@@ -662,15 +664,15 @@ nav{position:relative;z-index:10;background:var(--bg2);border-bottom:2px solid v
 }
 .btn-auth:hover{background-position:-100% 0;transform:translateY(-2px);box-shadow:0 8px 28px rgba(13,148,136,.44);}
 .btn-auth-ghost{
-  width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.16);
-  color:rgba(220,240,238,.82);padding:.7rem;border-radius:10px;cursor:pointer;
+  width:100%;background:rgba(13,148,136,.07);border:1px solid rgba(13,148,136,.28);
+  color:var(--text);padding:.7rem;border-radius:10px;cursor:pointer;
   font-family:'Exo 2',sans-serif;font-size:.82rem;transition:all .2s;margin-bottom:.45rem;
   display:flex;align-items:center;justify-content:center;gap:.5rem;
 }
-.btn-auth-ghost:hover{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.32);transform:translateY(-1px);}
-.auth-toggle{color:#5eead4;cursor:pointer;font-size:.76rem;margin-top:.7rem;display:inline-block;transition:opacity .2s;}
+.btn-auth-ghost:hover{background:rgba(13,148,136,.13);border-color:rgba(13,148,136,.5);transform:translateY(-1px);}
+.auth-toggle{color:#0d9488;cursor:pointer;font-size:.76rem;margin-top:.7rem;display:inline-block;transition:opacity .2s;}
 .auth-toggle:hover{opacity:.7;text-decoration:underline;}
-.auth-err{color:#fca5a5;font-size:.72rem;margin-top:.28rem;min-height:1rem;}
+.auth-err{color:#dc2626;font-size:.72rem;margin-top:.28rem;min-height:1rem;}
 /* User pill */
 .user-pill{display:flex;align-items:center;gap:.6rem;background:rgba(255,255,255,.15);
   border:1px solid rgba(255,255,255,.3);border-radius:999px;padding:.3rem .9rem .3rem .4rem;}
@@ -985,7 +987,7 @@ nav{position:relative;z-index:10;background:var(--bg2);border-bottom:2px solid v
         <div class="helix-rung" style="animation-delay:.9s"><div class="helix-dot" style="background:#fde68a"></div><div class="helix-line"></div><div class="helix-dot" style="background:#93c5fd"></div></div>
         <div class="helix-rung" style="animation-delay:1.2s"><div class="helix-dot" style="background:#5eead4"></div><div class="helix-line"></div><div class="helix-dot" style="background:#e05e3a"></div></div>
         <div class="helix-rung" style="animation-delay:1.5s"><div class="helix-dot" style="background:#c084fc"></div><div class="helix-line"></div><div class="helix-dot" style="background:#5eead4"></div></div>
-        <span style="font-family:'Orbitron',monospace;font-size:.38rem;color:rgba(94,234,212,.5);letter-spacing:1px;margin-top:2px;">DNA</span>
+        <span style="font-family:'Orbitron',monospace;font-size:.38rem;color:rgba(13,148,136,.6);letter-spacing:1px;margin-top:2px;">DNA</span>
       </div>
 
       <!-- Boy — coder -->
@@ -1595,7 +1597,7 @@ function signOut(){ fbAuth.signOut(); }
     'HELIX·SHEET·COIL·TURN','VQE·AI·FOLD·ENERGY',
     'QUANTUM·PROTEIN·DNA', 'AMINO·ACID·CHAIN·3D',
   ];
-  const COLORS = ['#5eead4','#93c5fd','#fde68a','#c084fc','#86efac','#fb923c','#67e8f9'];
+  const COLORS = ['#0d9488','#14b8a6','#e05e3a','#3b82f6','#10b981','#f97316','#8b5cf6'];
 
   const overlay = document.getElementById('auth-overlay');
   const ribbonContainer = document.getElementById('aa-ribbons-container');
@@ -1629,7 +1631,7 @@ function signOut(){ fbAuth.signOut(); }
     const top   = 5 + Math.random()*88;
     const dur   = 4 + Math.random()*6;
     const delay = Math.random()*4;
-    el.style.cssText = `width:${size}px;height:${size}px;left:${left}%;top:${top}%;background:${color};opacity:${.07+Math.random()*.12};animation-duration:${dur}s;animation-delay:${delay}s;`;
+    el.style.cssText = `width:${size}px;height:${size}px;left:${left}%;top:${top}%;background:${color};opacity:${.04+Math.random()*.07};animation-duration:${dur}s;animation-delay:${delay}s;`;
     bubbleContainer && bubbleContainer.appendChild(el);
   }
 
