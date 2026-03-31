@@ -5,7 +5,7 @@ import math
 import random
 import time
 import numpy as np
-import anthropic
+import google.generativeai as genai
 
 # Pre-import Qiskit at startup (avoids slow reimport on every request)
 try:
@@ -50,12 +50,13 @@ db = firestore.client()
 COLLECTION = "protein_results"
 
 # ─────────────────────────────────────────────────────
-# ANTHROPIC (CLAUDE) CLIENT
-# Set ANTHROPIC_API_KEY in your environment or .env file
+# GOOGLE GEMINI CLIENT
+# Set GEMINI_API_KEY in your environment or .env file
+# Free tier: https://aistudio.google.com/app/apikey
 # ─────────────────────────────────────────────────────
-anthropic_client = anthropic.Anthropic(
-    api_key=os.environ.get("ANTHROPIC_API_KEY", "")
-)
+_gemini_key = os.environ.get("GEMINI_API_KEY", "")
+if _gemini_key:
+    genai.configure(api_key=_gemini_key)
 
 
 # ─────────────────────────────────────────────────────
@@ -1676,8 +1677,8 @@ def ai_explain():
     if not sequence:
         return jsonify({'error': 'No sequence provided'}), 400
 
-    if not os.environ.get("ANTHROPIC_API_KEY"):
-        return jsonify({'error': 'ANTHROPIC_API_KEY not configured on server'}), 503
+    if not os.environ.get("GEMINI_API_KEY"):
+        return jsonify({'error': 'GEMINI_API_KEY not configured on server'}), 503
 
     prompt = f"""You are an expert structural biologist and bioinformatician.
 A user has submitted a protein sequence for quantum AI analysis. Below are the computed results.
@@ -1711,15 +1712,10 @@ Write in plain English. Use markdown bold for section headers. Keep each section
 Do not repeat raw numbers unless they add insight. Do not add a preamble or closing sign-off."""
 
     try:
-        message = anthropic_client.messages.create(
-            model="claude-sonnet-4-20250514",
-            max_tokens=1024,
-            messages=[{"role": "user", "content": prompt}]
-        )
-        explanation = message.content[0].text
+        model = genai.GenerativeModel("gemini-1.5-flash")
+        response = model.generate_content(prompt)
+        explanation = response.text
         return jsonify({'success': True, 'explanation': explanation})
-    except anthropic.AuthenticationError:
-        return jsonify({'error': 'Invalid ANTHROPIC_API_KEY. Check server configuration.'}), 503
     except Exception as e:
         return jsonify({'error': f'AI explanation failed: {str(e)}'}), 500
 
@@ -1742,8 +1738,8 @@ def ai_chat():
 
     if not question:
         return jsonify({'error': 'No question provided'}), 400
-    if not os.environ.get("ANTHROPIC_API_KEY"):
-        return jsonify({'error': 'ANTHROPIC_API_KEY not configured on server'}), 503
+    if not os.environ.get("GEMINI_API_KEY"):
+        return jsonify({'error': 'GEMINI_API_KEY not configured on server'}), 503
 
     ai_result      = context.get('ai_result', {})
     quantum_result = context.get('quantum_result', {})
@@ -1769,23 +1765,19 @@ Answer questions clearly and concisely. If asked something outside protein biolo
 Keep answers under 150 words unless a detailed explanation is explicitly requested.
 Use markdown for any lists or emphasis."""
 
-    messages = []
-    for h in history[-8:]:   # keep last 8 turns for context
+    # Build full prompt with system context + history + question
+    full_prompt = system_prompt + "\n\nConversation so far:\n"
+    for h in history[-8:]:
         if h.get('role') in ('user', 'assistant') and h.get('content'):
-            messages.append({'role': h['role'], 'content': h['content']})
-    messages.append({'role': 'user', 'content': question})
+            role_label = "User" if h['role'] == 'user' else "Assistant"
+            full_prompt += f"\n{role_label}: {h['content']}"
+    full_prompt += f"\n\nUser: {question}\nAssistant:"
 
     try:
-        message = anthropic_client.messages.create(
-            model="claude-sonnet-4-20250514",
-            max_tokens=512,
-            system=system_prompt,
-            messages=messages
-        )
-        answer = message.content[0].text
+        model = genai.GenerativeModel("gemini-1.5-flash")
+        response = model.generate_content(full_prompt)
+        answer = response.text
         return jsonify({'success': True, 'answer': answer})
-    except anthropic.AuthenticationError:
-        return jsonify({'error': 'Invalid ANTHROPIC_API_KEY. Check server configuration.'}), 503
     except Exception as e:
         return jsonify({'error': f'AI chat failed: {str(e)}'}), 500
 
