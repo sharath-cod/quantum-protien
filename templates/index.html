@@ -55,44 +55,6 @@ nav{position:relative;z-index:10;background:var(--bg2);border-bottom:2px solid v
 .tab-btn.active{color:var(--accent);border-bottom-color:var(--accent2);}
 .tab-btn:hover{color:var(--text);}
 
-/* INLINE TOOLTIP */
-.tooltip-wrap{position:relative;display:inline-flex;align-items:center;}
-.tooltip-icon{
-  display:inline-flex;align-items:center;justify-content:center;
-  width:16px;height:16px;border-radius:50%;
-  background:var(--accent);color:white;
-  font-size:.65rem;font-weight:700;font-family:'Exo 2',sans-serif;
-  cursor:help;margin-left:.5rem;flex-shrink:0;
-  transition:background .2s;
-}
-.tooltip-icon:hover{background:var(--accent2);}
-.tooltip-box{
-  display:none;
-  position:absolute;
-  top:calc(100% + 8px);
-  left:0;
-  width:260px;
-  background:var(--text);
-  color:#fff;
-  font-family:'Exo 2',sans-serif;
-  font-size:.75rem;
-  font-weight:400;
-  line-height:1.6;
-  padding:.7rem .9rem;
-  border-radius:8px;
-  box-shadow:0 4px 16px rgba(0,0,0,.2);
-  z-index:1000;
-  letter-spacing:0;
-  text-transform:none;
-  pointer-events:none;
-}
-.tooltip-box::before{
-  content:'';position:absolute;top:-5px;left:12px;
-  width:10px;height:10px;background:var(--text);
-  transform:rotate(45deg);border-radius:2px;
-}
-.tooltip-wrap:hover .tooltip-box{display:block;}
-
 /* PAGES */
 .page{display:none;position:relative;z-index:5;max-width:1400px;margin:0 auto;padding:1.5rem 2rem;}
 .page.active{display:block;}
@@ -547,7 +509,7 @@ nav{position:relative;z-index:10;background:var(--bg2);border-bottom:2px solid v
 .quantum-improvement{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.8rem;margin-bottom:1rem;}
 .qi-card{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:.8rem;text-align:center;}
 .qi-val{font-family:'Orbitron',monospace;font-size:1.1rem;font-weight:700;}
-.qi-lbl{font-size:.65rem;color:var(--dim);margin-top:3px;letter-spacing:1px;text-transform:uppercase;}
+.qi-lbl{font-size:.65rem;color:var(--dim);margin-top:3px;letter-spacing:1px;text-transform:uppercase;display:flex;align-items:center;justify-content:center;gap:3px;}
 .qi-improvement{color:var(--green);}
 .qi-classical{color:var(--accent);}
 .qi-quantum{color:var(--accent2);}
@@ -601,13 +563,13 @@ nav{position:relative;z-index:10;background:var(--bg2);border-bottom:2px solid v
 .custom-detect.show{display:block;}
 
 /* ══════════════════════════════════════════════════════
-   ANIMATED LOGIN PAGE  — soft bioscience theme
+   ANIMATED LOGIN PAGE
 ══════════════════════════════════════════════════════ */
 #auth-overlay{
   position:fixed;inset:0;z-index:2000;
   display:flex;align-items:center;justify-content:center;
   overflow:hidden;
-  background:linear-gradient(135deg,#d0f0ed 0%,#e6f7f7 25%,#f0fafa 55%,#d8f0f0 80%,#e0f5f5 100%);
+  background:linear-gradient(135deg,#020c14 0%,#051a2e 25%,#0a2a1a 50%,#0d1f3c 75%,#050f1a 100%);
   background-size:400% 400%;
   animation:bgShift 12s ease infinite;
 }
@@ -616,49 +578,15 @@ nav{position:relative;z-index:10;background:var(--bg2);border-bottom:2px solid v
   50%{background-position:100% 50%;}
   100%{background-position:0% 50%;}
 }
-
-/* ── decorative background grid ── */
-#auth-overlay::before{
-  content:'';position:absolute;inset:0;pointer-events:none;
-  background-image:
-    linear-gradient(rgba(13,148,136,.07) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(13,148,136,.07) 1px,transparent 1px);
-  background-size:48px 48px;
-  animation:gridDrift 20s linear infinite;
-}
-@keyframes gridDrift{from{background-position:0 0;}to{background-position:48px 48px;}}
-
-/* ── large teal glow orbs in background ── */
-.auth-orb{
-  position:absolute;border-radius:50%;pointer-events:none;
-  background:radial-gradient(circle,rgba(13,148,136,.18) 0%,rgba(13,148,136,.04) 60%,transparent 100%);
-  animation:orbPulse ease-in-out infinite;
-}
-.auth-orb.orb-a{width:420px;height:420px;top:-10%;left:-8%;animation-duration:8s;}
-.auth-orb.orb-b{width:320px;height:320px;bottom:5%;right:-5%;animation-duration:11s;animation-delay:2s;
-  background:radial-gradient(circle,rgba(224,94,58,.12) 0%,rgba(224,94,58,.03) 60%,transparent 100%);}
-.auth-orb.orb-c{width:200px;height:200px;top:40%;right:15%;animation-duration:7s;animation-delay:4s;}
-@keyframes orbPulse{0%,100%{transform:scale(1);}50%{transform:scale(1.15);}}
-
-/* ── floating molecule nodes ── */
-.mol-node{
-  position:absolute;border-radius:50%;pointer-events:none;
-  border:1.5px solid rgba(13,148,136,.35);
-  background:rgba(13,148,136,.08);
-  animation:molFloat ease-in-out infinite;
-}
-@keyframes molFloat{0%,100%{transform:translateY(0) rotate(0deg);}50%{transform:translateY(-18px) rotate(8deg);}}
-
 .aa-ribbon{
   position:absolute;font-family:'Orbitron',monospace;font-size:.7rem;
   letter-spacing:3px;pointer-events:none;white-space:nowrap;opacity:0;
-  color:rgba(13,148,136,.55);
   animation:ribbonFloat linear infinite;
 }
 @keyframes ribbonFloat{
   0%{opacity:0;transform:translateY(100vh) translateX(0);}
-  8%{opacity:.6;}
-  92%{opacity:.6;}
+  8%{opacity:.5;}
+  92%{opacity:.5;}
   100%{opacity:0;transform:translateY(-12vh) translateX(var(--drift,20px));}
 }
 .dna-bubble{
@@ -670,52 +598,17 @@ nav{position:relative;z-index:10;background:var(--bg2);border-bottom:2px solid v
   50%{transform:translateY(-26px) scale(1.1);}
 }
 .scan-line{
-  position:absolute;left:0;right:0;height:2px;
-  background:linear-gradient(90deg,transparent,rgba(13,148,136,.4),rgba(224,94,58,.25),rgba(13,148,136,.4),transparent);
-  animation:scanMove 9s linear infinite;pointer-events:none;
+  position:absolute;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(13,148,136,.55),rgba(224,94,58,.35),rgba(13,148,136,.55),transparent);
+  animation:scanMove 7s linear infinite;pointer-events:none;
 }
-@keyframes scanMove{from{top:-2px;}to{top:100vh;}}
-
-/* ── stat panels floating behind card ── */
-.auth-float-panel{
-  position:absolute;background:rgba(255,255,255,.72);
-  border:1px solid rgba(13,148,136,.25);border-radius:14px;
-  padding:.85rem 1.1rem;backdrop-filter:blur(10px);
-  box-shadow:0 4px 20px rgba(13,148,136,.1);
-  pointer-events:none;animation:panelFloat ease-in-out infinite;
-  min-width:155px;
-}
-.auth-float-panel.fp-a{top:12%;left:2%;animation-duration:6s;}
-.auth-float-panel.fp-b{top:20%;right:2%;animation-duration:7.5s;animation-delay:1.5s;}
-.auth-float-panel.fp-c{bottom:16%;left:3%;animation-duration:8s;animation-delay:3s;}
-.auth-float-panel.fp-d{bottom:22%;right:3%;animation-duration:6.5s;animation-delay:.8s;}
-@keyframes panelFloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}}
-.afp-label{font-size:.58rem;color:#4d7c78;letter-spacing:1.8px;text-transform:uppercase;margin-bottom:.3rem;font-family:'Orbitron',monospace;}
-.afp-value{font-family:'Orbitron',monospace;font-size:1.1rem;font-weight:700;color:#0d9488;}
-.afp-sub{font-size:.62rem;color:#4d7c78;margin-top:2px;}
-.afp-bar{height:4px;border-radius:99px;background:rgba(13,148,136,.15);margin-top:.5rem;overflow:hidden;}
-.afp-bar-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,#0d9488,#e05e3a);animation:afpBarAnim 3s ease-in-out infinite;}
-@keyframes afpBarAnim{0%,100%{opacity:.7;}50%{opacity:1;}}
-
-/* ── helix decoration strip on sides ── */
-.auth-helix-strip{
-  position:absolute;top:0;bottom:0;width:44px;display:flex;flex-direction:column;
-  justify-content:space-evenly;align-items:center;pointer-events:none;opacity:.35;
-}
-.auth-helix-strip.left{left:0;}
-.auth-helix-strip.right{right:0;}
-.ahs-dot{width:8px;height:8px;border-radius:50%;background:#0d9488;
-  box-shadow:0 0 6px rgba(13,148,136,.5);}
-.ahs-dot:nth-child(even){background:#e05e3a;margin-left:18px;}
-.ahs-dot:nth-child(odd){margin-left:-18px;}
-.ahs-line{width:30px;height:1px;background:rgba(13,148,136,.4);}
-
+@keyframes scanMove{from{top:-1px;}to{top:100vh;}}
 .auth-card{
   position:relative;z-index:10;width:430px;max-width:94vw;
-  background:rgba(255,255,255,.88);
+  background:rgba(5,18,30,.85);
   border:1px solid rgba(13,148,136,.3);border-radius:22px;
   padding:2.2rem 2.4rem 1.8rem;
-  box-shadow:0 0 0 1px rgba(13,148,136,.1),0 32px 80px rgba(13,148,136,.15),0 0 55px rgba(13,148,136,.08),inset 0 1px 0 rgba(255,255,255,.9);
+  box-shadow:0 0 0 1px rgba(13,148,136,.08),0 32px 80px rgba(0,0,0,.65),0 0 55px rgba(13,148,136,.07),inset 0 1px 0 rgba(255,255,255,.05);
   backdrop-filter:blur(20px);
   animation:cardIn .7s cubic-bezier(.34,1.56,.64,1) both;
 }
@@ -731,11 +624,11 @@ nav{position:relative;z-index:10;background:var(--bg2);border-bottom:2px solid v
 }
 .char-wrap{display:flex;flex-direction:column;align-items:center;gap:3px;animation:charBob 3.2s ease-in-out infinite;}
 .char-wrap.right{animation-delay:.9s;}
-.char-wrap svg{filter:drop-shadow(0 5px 14px rgba(13,148,136,.35));}
+.char-wrap svg{filter:drop-shadow(0 5px 14px rgba(13,148,136,.45));}
 @keyframes charBob{0%,100%{transform:translateY(0);}50%{transform:translateY(-9px);}}
-.char-label{font-family:'Exo 2',sans-serif;font-size:.55rem;letter-spacing:1.5px;text-transform:uppercase;opacity:.7;}
-.char-label.girl{color:#0f766e;}
-.char-label.boy{color:#0d9488;}
+.char-label{font-family:'Exo 2',sans-serif;font-size:.55rem;letter-spacing:1.5px;text-transform:uppercase;opacity:.6;}
+.char-label.girl{color:#5eead4;}
+.char-label.boy{color:#93c5fd;}
 .dna-helix-center{position:absolute;left:50%;top:8px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:4px;}
 .helix-rung{display:flex;align-items:center;gap:3px;animation:helixPulse 2.4s ease-in-out infinite;}
 .helix-rung:nth-child(odd){animation-direction:reverse;}
@@ -744,40 +637,40 @@ nav{position:relative;z-index:10;background:var(--bg2);border-bottom:2px solid v
 .helix-line{width:20px;height:1px;background:rgba(13,148,136,.35);}
 .auth-logo{
   font-family:'Orbitron',monospace;font-size:1rem;font-weight:900;text-align:center;
-  background:linear-gradient(90deg,#0f766e,#0d9488 45%,#e05e3a 75%,#0f766e);
+  background:linear-gradient(90deg,#5eead4,#ffffff 45%,#fdba74 75%,#5eead4);
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;
   background-size:250% 100%;animation:logoShimmer 4s linear infinite;
   margin-bottom:.2rem;letter-spacing:.8px;
 }
 @keyframes logoShimmer{to{background-position:-250% 0;}}
-.auth-sub{font-size:.62rem;color:#4d7c78;letter-spacing:2.5px;text-transform:uppercase;text-align:center;margin-bottom:1.4rem;}
+.auth-sub{font-size:.62rem;color:rgba(148,200,190,.58);letter-spacing:2.5px;text-transform:uppercase;text-align:center;margin-bottom:1.4rem;}
 .auth-divider{display:flex;align-items:center;gap:.6rem;margin:.65rem 0;}
-.auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:rgba(13,148,136,.2);}
-.auth-divider span{font-size:.62rem;color:#4d7c78;letter-spacing:2px;}
+.auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:rgba(13,148,136,.18);}
+.auth-divider span{font-size:.62rem;color:rgba(148,200,190,.4);letter-spacing:2px;}
 .auth-input{
-  width:100%;background:var(--bg3);border:1px solid var(--border);
-  color:var(--text);padding:.72rem 1rem;border-radius:10px;
+  width:100%;background:rgba(13,148,136,.07);border:1px solid rgba(13,148,136,.22);
+  color:#d1faf5;padding:.72rem 1rem;border-radius:10px;
   font-family:'Exo 2',sans-serif;font-size:.87rem;margin-bottom:.62rem;outline:none;transition:border .2s,box-shadow .2s;
 }
-.auth-input::placeholder{color:#7aafa9;}
-.auth-input:focus{border-color:#0d9488;box-shadow:0 0 0 3px rgba(13,148,136,.12);}
+.auth-input::placeholder{color:rgba(148,200,190,.32);}
+.auth-input:focus{border-color:#0d9488;box-shadow:0 0 0 3px rgba(13,148,136,.14);}
 .btn-auth{
   width:100%;background:linear-gradient(135deg,#0f766e 0%,#0d9488 45%,#e05e3a 100%);
   background-size:200% 100%;border:none;color:white;padding:.83rem;border-radius:10px;cursor:pointer;
   font-family:'Orbitron',monospace;font-size:.73rem;letter-spacing:2px;font-weight:700;
   transition:all .3s;margin-bottom:.55rem;box-shadow:0 4px 18px rgba(13,148,136,.28);
 }
-.btn-auth:hover{background-position:-100% 0;transform:translateY(-2px);box-shadow:0 8px 28px rgba(13,148,136,.4);}
+.btn-auth:hover{background-position:-100% 0;transform:translateY(-2px);box-shadow:0 8px 28px rgba(13,148,136,.44);}
 .btn-auth-ghost{
-  width:100%;background:var(--bg3);border:1px solid var(--border);
-  color:var(--dim);padding:.7rem;border-radius:10px;cursor:pointer;
+  width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.16);
+  color:rgba(220,240,238,.82);padding:.7rem;border-radius:10px;cursor:pointer;
   font-family:'Exo 2',sans-serif;font-size:.82rem;transition:all .2s;margin-bottom:.45rem;
   display:flex;align-items:center;justify-content:center;gap:.5rem;
 }
-.btn-auth-ghost:hover{border-color:#0d9488;color:#0d9488;background:rgba(13,148,136,.06);transform:translateY(-1px);}
-.auth-toggle{color:#0d9488;cursor:pointer;font-size:.76rem;margin-top:.7rem;display:inline-block;transition:opacity .2s;}
+.btn-auth-ghost:hover{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.32);transform:translateY(-1px);}
+.auth-toggle{color:#5eead4;cursor:pointer;font-size:.76rem;margin-top:.7rem;display:inline-block;transition:opacity .2s;}
 .auth-toggle:hover{opacity:.7;text-decoration:underline;}
-.auth-err{color:#dc2626;font-size:.72rem;margin-top:.28rem;min-height:1rem;}
+.auth-err{color:#fca5a5;font-size:.72rem;margin-top:.28rem;min-height:1rem;}
 /* User pill */
 .user-pill{display:flex;align-items:center;gap:.6rem;background:rgba(255,255,255,.15);
   border:1px solid rgba(255,255,255,.3);border-radius:999px;padding:.3rem .9rem .3rem .4rem;}
@@ -979,47 +872,33 @@ nav{position:relative;z-index:10;background:var(--bg2);border-bottom:2px solid v
 .unknown-warn-title{font-size:.72rem;color:var(--yellow);font-weight:700;letter-spacing:1px;
   text-transform:uppercase;margin-bottom:.3rem;}
 .unknown-warn-body{font-size:.72rem;color:var(--dim);line-height:1.6;}
+
+/* ── HELP BUTTON (? icon) ── */
+.hb{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:16px;height:16px;border-radius:50%;
+  background:rgba(13,148,136,.18);border:1px solid rgba(13,148,136,.45);
+  color:var(--accent);font-size:.62rem;font-weight:700;font-family:'Exo 2',sans-serif;
+  cursor:help;margin-left:5px;vertical-align:middle;
+  transition:background .15s,border-color .15s;
+  position:relative;top:-1px;
+  flex-shrink:0;line-height:1;
+}
+.hb:hover{background:rgba(13,148,136,.35);border-color:var(--accent);}
+/* Inside dark final-box the hb needs lighter colours */
+.final-box .hb{
+  background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.4);
+  color:rgba(255,255,255,.85);
+}
+.final-box .hb:hover{background:rgba(255,255,255,.28);}
+/* fi-lbl row: keep label + hb on one line */
+.fi-lbl{display:flex;align-items:center;justify-content:center;gap:3px;}
 </style>
 </head>
 <body>
 
 <!-- AUTH OVERLAY — Animated Login -->
 <div id="auth-overlay">
-
-  <!-- Background glow orbs -->
-  <div class="auth-orb orb-a"></div>
-  <div class="auth-orb orb-b"></div>
-  <div class="auth-orb orb-c"></div>
-
-  <!-- Helix decorative strips on sides -->
-  <div class="auth-helix-strip left" id="helix-left"></div>
-  <div class="auth-helix-strip right" id="helix-right"></div>
-
-  <!-- Floating stat mini-panels -->
-  <div class="auth-float-panel fp-a">
-    <div class="afp-label">Confidence</div>
-    <div class="afp-value">94.7%</div>
-    <div class="afp-sub">AlphaFold Score</div>
-    <div class="afp-bar"><div class="afp-bar-fill" style="width:94.7%"></div></div>
-  </div>
-  <div class="auth-float-panel fp-b">
-    <div class="afp-label">Energy</div>
-    <div class="afp-value">−142 kJ</div>
-    <div class="afp-sub">VQE Optimised</div>
-    <div class="afp-bar"><div class="afp-bar-fill" style="width:78%"></div></div>
-  </div>
-  <div class="auth-float-panel fp-c">
-    <div class="afp-label">Qubits</div>
-    <div class="afp-value">127</div>
-    <div class="afp-sub">Quantum Backend</div>
-    <div class="afp-bar"><div class="afp-bar-fill" style="width:63%"></div></div>
-  </div>
-  <div class="auth-float-panel fp-d">
-    <div class="afp-label">Residues</div>
-    <div class="afp-value">512</div>
-    <div class="afp-sub">Sequence Length</div>
-    <div class="afp-bar"><div class="afp-bar-fill" style="width:51%"></div></div>
-  </div>
 
   <!-- Scan line -->
   <div class="scan-line"></div>
@@ -1100,12 +979,12 @@ nav{position:relative;z-index:10;background:var(--bg2);border-bottom:2px solid v
 
       <!-- DNA helix in center -->
       <div class="dna-helix-center">
-        <div class="helix-rung"><div class="helix-dot" style="background:#0d9488"></div><div class="helix-line"></div><div class="helix-dot" style="background:#e05e3a"></div></div>
-        <div class="helix-rung" style="animation-delay:.3s"><div class="helix-dot" style="background:#e05e3a"></div><div class="helix-line"></div><div class="helix-dot" style="background:#0d9488"></div></div>
-        <div class="helix-rung" style="animation-delay:.6s"><div class="helix-dot" style="background:#0891b2"></div><div class="helix-line"></div><div class="helix-dot" style="background:#d97706"></div></div>
-        <div class="helix-rung" style="animation-delay:.9s"><div class="helix-dot" style="background:#d97706"></div><div class="helix-line"></div><div class="helix-dot" style="background:#0891b2"></div></div>
-        <div class="helix-rung" style="animation-delay:1.2s"><div class="helix-dot" style="background:#0d9488"></div><div class="helix-line"></div><div class="helix-dot" style="background:#e05e3a"></div></div>
-        <div class="helix-rung" style="animation-delay:1.5s"><div class="helix-dot" style="background:#059669"></div><div class="helix-line"></div><div class="helix-dot" style="background:#0d9488"></div></div>
+        <div class="helix-rung"><div class="helix-dot" style="background:#5eead4"></div><div class="helix-line"></div><div class="helix-dot" style="background:#e05e3a"></div></div>
+        <div class="helix-rung" style="animation-delay:.3s"><div class="helix-dot" style="background:#e05e3a"></div><div class="helix-line"></div><div class="helix-dot" style="background:#5eead4"></div></div>
+        <div class="helix-rung" style="animation-delay:.6s"><div class="helix-dot" style="background:#93c5fd"></div><div class="helix-line"></div><div class="helix-dot" style="background:#fde68a"></div></div>
+        <div class="helix-rung" style="animation-delay:.9s"><div class="helix-dot" style="background:#fde68a"></div><div class="helix-line"></div><div class="helix-dot" style="background:#93c5fd"></div></div>
+        <div class="helix-rung" style="animation-delay:1.2s"><div class="helix-dot" style="background:#5eead4"></div><div class="helix-line"></div><div class="helix-dot" style="background:#e05e3a"></div></div>
+        <div class="helix-rung" style="animation-delay:1.5s"><div class="helix-dot" style="background:#c084fc"></div><div class="helix-line"></div><div class="helix-dot" style="background:#5eead4"></div></div>
         <span style="font-family:'Orbitron',monospace;font-size:.38rem;color:rgba(94,234,212,.5);letter-spacing:1px;margin-top:2px;">DNA</span>
       </div>
 
@@ -1289,13 +1168,13 @@ nav{position:relative;z-index:10;background:var(--bg2);border-bottom:2px solid v
 
   <!-- Pipeline indicator -->
   <div class="pipeline">
-    <div class="pip-step" id="pip1">1. Input Sequence<span class="tooltip-wrap"><span class="tooltip-icon">?</span><span class="tooltip-box">Enter your amino acid sequence using single-letter codes (A, C, D, E...). FASTA format also supported. System normalises ambiguous IUPAC codes automatically.</span></span></div>
+    <div class="pip-step" id="pip1">1. Input Sequence</div>
     <div class="pip-arrow">→</div>
-    <div class="pip-step" id="pip2">2. AI Prediction<span class="tooltip-wrap"><span class="tooltip-icon">?</span><span class="tooltip-box">Chou-Fasman algorithm predicts secondary structure. Uses propensity tables from 1978 research paper — each amino acid has a known tendency to form helix, sheet or coil based on 15,000+ known protein structures.</span></span></div>
+    <div class="pip-step" id="pip2">2. AI Prediction</div>
     <div class="pip-arrow">→</div>
-    <div class="pip-step" id="pip3">3. Quantum VQE<span class="tooltip-wrap"><span class="tooltip-icon">?</span><span class="tooltip-box">Variational Quantum Eigensolver runs on Qiskit Aer simulator. Builds a Pauli Hamiltonian from amino acid interactions, then uses RY+CNOT quantum circuit to find minimum energy conformation.</span></span></div>
+    <div class="pip-step" id="pip3">3. Quantum VQE</div>
     <div class="pip-arrow">→</div>
-    <div class="pip-step" id="pip4">4. Structure Output<span class="tooltip-wrap"><span class="tooltip-icon">?</span><span class="tooltip-box">Final predicted structure combining AI + quantum results. Includes 3D visualisation, disease risk assessment, quantum energy landscape, and comparison with known healthy proteins.</span></span></div>
+    <div class="pip-step" id="pip4">4. Structure Output</div>
   </div>
 
   <div class="input-grid">
@@ -1384,19 +1263,32 @@ nav{position:relative;z-index:10;background:var(--bg2);border-bottom:2px solid v
 
     <!-- Final Summary -->
     <div class="final-box">
-      <div class="final-title">🎯 PREDICTED PROTEIN STRUCTURE
-        <span class="tooltip-wrap"><span class="tooltip-icon">?</span><span class="tooltip-box">The overall 3D shape prediction combining AI Chou-Fasman analysis and quantum VQE energy optimization. Shows dominant structure, fold topology, stability and minimum energy.</span></span>
-      </div>
+      <div class="final-title">🎯 PREDICTED PROTEIN STRUCTURE</div>
       <div class="final-grid">
-        <div class="final-item"><div class="fi-val" id="res-structure">-</div><div class="fi-lbl">Secondary Structure<span class="tooltip-wrap"><span class="tooltip-icon">?</span><span class="tooltip-box">The local 3D shape of the protein backbone — Alpha Helix (coil), Beta Sheet (flat strand), Beta Turn (reversal), or Random Coil (no regular pattern). Predicted using Chou-Fasman propensity tables.</span></span></div></div>
-        <div class="final-item"><div class="fi-val" id="res-fold">-</div><div class="fi-lbl">Fold Topology<span class="tooltip-wrap"><span class="tooltip-icon">?</span><span class="tooltip-box">The overall 3D architecture of the protein — derived from the quantum ground state. Examples: Compact globular fold (dense sphere), Beta barrel (hollow cylinder), Immunoglobulin fold (antibody shape).</span></span></div></div>
         <div class="final-item">
-          <div class="fi-val" id="res-stability" style="font-size:.95rem;">-</div>
-          <div class="fi-lbl">Stability<span class="tooltip-wrap"><span class="tooltip-icon">?</span><span class="tooltip-box">Stable = folds correctly and stays functional. Pathologically Stable = locked in a harmful misfolded shape (like Alzheimer's amyloid — it's stable, just wrong). Unstable = degrades before functioning.</span></span></div>
+          <div class="fi-val" id="res-structure">-</div>
+          <div class="fi-lbl">Secondary Structure<span class="hb badge-tip" data-tip="The dominant secondary structure predicted by sliding-window Chou-Fasman analysis. Alpha Helix = coiled rod; Beta Sheet = flat arrows; Beta Turn = sharp bend; Random Coil = flexible loop.">?</span></div>
         </div>
-        <div class="final-item"><div class="fi-val" id="res-energy">-</div><div class="fi-lbl">Min Energy (eV)<span class="tooltip-wrap"><span class="tooltip-icon">?</span><span class="tooltip-box">The quantum ground state energy found by VQE — the lowest possible energy the protein can reach. More negative = more stable fold. This is the energy a drug molecule needs to overcome to change the protein's shape.</span></span></div></div>
-        <div class="final-item"><div class="fi-val" id="res-conf">-</div><div class="fi-lbl">AI Confidence<span class="tooltip-wrap"><span class="tooltip-icon">?</span><span class="tooltip-box">How confident the Chou-Fasman AI model is in its structure prediction. Based on how strongly the sequence matches known structural patterns. >70% = reliable prediction. <40% = ambiguous sequence.</span></span></div></div>
-        <div class="final-item"><div class="fi-val" id="res-qubits">-</div><div class="fi-lbl">Qubits Used<span class="tooltip-wrap"><span class="tooltip-icon">?</span><span class="tooltip-box">Number of quantum bits in the VQE circuit. Each qubit represents a segment of the protein chain. More qubits = more accurate quantum simulation. Currently capped at 4 for speed on a simulator.</span></span></div></div>
+        <div class="final-item">
+          <div class="fi-val" id="res-fold">-</div>
+          <div class="fi-lbl">Fold Topology<span class="hb badge-tip" data-tip="3D fold topology predicted from the lowest-energy quantum state. Determined by mapping the best qubit state (e.g. |0001⟩) to known structural motifs like TIM barrel, Rossmann fold, Greek key, etc.">?</span></div>
+        </div>
+        <div class="final-item">
+          <div class="fi-val" id="res-stability">-</div>
+          <div class="fi-lbl">Stability<span class="hb badge-tip" data-tip="Stable = Instability Index < 40 and low disease risk. Unstable = II ≥ 40, prone to degradation. Pathologically Stable = stable structure but misfolded, associated with disease (e.g. amyloid fibrils).">?</span></div>
+        </div>
+        <div class="final-item">
+          <div class="fi-val" id="res-energy">-</div>
+          <div class="fi-lbl">Min Energy (eV)<span class="hb badge-tip" data-tip="Quantum ground-state energy in electron-volts (eV), found by exact matrix diagonalization of the protein Hamiltonian. More negative = more stable fold. This is the lowest possible energy the protein can achieve.">?</span></div>
+        </div>
+        <div class="final-item">
+          <div class="fi-val" id="res-conf">-</div>
+          <div class="fi-lbl">AI Confidence<span class="hb badge-tip" data-tip="Confidence of the dominant structure prediction (0–100%). Derived from the Chou-Fasman propensity score of the winning structure class. Reduced by 5% per ambiguous residue substitution.">?</span></div>
+        </div>
+        <div class="final-item">
+          <div class="fi-val" id="res-qubits">-</div>
+          <div class="fi-lbl">Qubits Used<span class="hb badge-tip" data-tip="Number of qubits in the quantum circuit (2–4). Each qubit represents a coarse-grained segment of the protein chain. More qubits = finer resolution but exponentially more computation.">?</span></div>
+        </div>
       </div>
     </div>
 
@@ -1405,27 +1297,19 @@ nav{position:relative;z-index:10;background:var(--bg2);border-bottom:2px solid v
 
     <!-- ④ QUANTUM ENERGY IMPROVEMENT -->
     <div class="panel">
-      <div class="panel-title">⚛ QUANTUM ENERGY OPTIMIZATION
-        <span class="tooltip-wrap"><span class="tooltip-icon">?</span><span class="tooltip-box">VQE (Variational Quantum Eigensolver) finds the minimum energy conformation of the protein. Lower energy = more stable fold. The improvement shows how much better quantum optimization is vs naive classical calculation.</span></span>
-      </div>
+      <div class="panel-title">⚛ QUANTUM ENERGY OPTIMIZATION</div>
       <div class="quantum-improvement">
         <div class="qi-card">
           <div class="qi-val qi-classical" id="qi-classical">—</div>
-          <div class="qi-lbl">Classical Estimate (eV)
-            <span class="tooltip-wrap"><span class="tooltip-icon">?</span><span class="tooltip-box">Naive sum of amino acid interaction energies — hydrophobic attractions, electrostatic repulsions, hydrogen bonds. This is the starting point before quantum optimization. Less negative = higher energy = less stable.</span></span>
-          </div>
+          <div class="qi-lbl">Classical Energy (eV)<span class="hb badge-tip" data-tip="Energy estimated from pairwise amino acid interactions using hydrophobic, electrostatic, and hydrogen-bond terms — no quantum effects applied. This is the starting point before VQE optimization.">?</span></div>
         </div>
         <div class="qi-card">
           <div class="qi-val qi-quantum" id="qi-quantum">—</div>
-          <div class="qi-lbl">Quantum Ground State (eV)
-            <span class="tooltip-wrap"><span class="tooltip-icon">?</span><span class="tooltip-box">The true minimum energy found by VQE — the lowest energy the protein can reach. Always more negative than the classical estimate. This is the drug target conformation. More negative = more stable fold.</span></span>
-          </div>
+          <div class="qi-lbl">Quantum Ground State (eV)<span class="hb badge-tip" data-tip="The exact minimum energy found by diagonalizing the quantum Hamiltonian matrix (scipy.linalg.eigh). This is the true lowest energy eigenvalue — the most stable configuration the protein can reach.">?</span></div>
         </div>
         <div class="qi-card">
           <div class="qi-val qi-improvement" id="qi-improvement">—</div>
-          <div class="qi-lbl">VQE Optimization Gain
-            <span class="tooltip-wrap"><span class="tooltip-icon">?</span><span class="tooltip-box">How much further quantum VQE lowered the energy below the classical estimate. Higher % = quantum found a significantly more stable conformation. This gain is what makes quantum useful for drug discovery.</span></span>
-          </div>
+          <div class="qi-lbl">VQE Optimization Gain<span class="hb badge-tip" data-tip="Percentage improvement from classical estimate to quantum ground state: (classical − quantum) / |classical| × 100. Positive = quantum found a lower energy than the classical estimate. Shows the advantage of quantum optimization.">?</span></div>
         </div>
       </div>
       <div style="text-align:center;margin-top:.4rem;">
@@ -1437,25 +1321,21 @@ nav{position:relative;z-index:10;background:var(--bg2);border-bottom:2px solid v
     <div class="results-grid">
       <!-- AI Confidence Scores -->
       <div class="panel">
-        <div class="panel-title">🤖 AI Structure Prediction
-          <span class="tooltip-wrap"><span class="tooltip-icon">?</span><span class="tooltip-box">Uses the Chou-Fasman algorithm (1978) — real biochemical propensity tables for each amino acid. Predicts how likely each residue is to form Alpha Helix, Beta Sheet, Beta Turn or Random Coil.</span></span>
-        </div>
+        <div class="panel-title">🤖 AI Structure Prediction</div>
         <div id="conf-bars"></div>
         <div style="margin-top:.8rem;">
-          <div style="font-size:.75rem;color:var(--dim);margin-bottom:.4rem;">HELIX REGIONS<span class="tooltip-wrap"><span class="tooltip-icon">?</span><span class="tooltip-box">Positions in the sequence where alpha-helix structure is predicted. Format: [start-end]. Alpha helices are right-handed coils stabilised by hydrogen bonds every 4 residues — common in membrane proteins.</span></span></div>
+          <div style="font-size:.75rem;color:var(--dim);margin-bottom:.4rem;">HELIX REGIONS</div>
           <div id="helix-regions" style="font-size:.75rem;color:var(--text);font-family:monospace;"></div>
         </div>
         <div style="margin-top:.6rem;">
-          <div style="font-size:.75rem;color:var(--dim);margin-bottom:.4rem;">SHEET REGIONS<span class="tooltip-wrap"><span class="tooltip-icon">?</span><span class="tooltip-box">Positions where beta-sheet structure is predicted. Beta sheets are flat extended strands — the dominant structure in amyloid fibrils. High sheet content is a key marker for Alzheimer's and prion diseases.</span></span></div>
+          <div style="font-size:.75rem;color:var(--dim);margin-bottom:.4rem;">SHEET REGIONS</div>
           <div id="sheet-regions" style="font-size:.75rem;color:var(--text);font-family:monospace;"></div>
         </div>
       </div>
 
       <!-- VQE Energy Convergence -->
       <div class="panel">
-        <div class="panel-title">⚛ VQE Energy Convergence
-          <span class="tooltip-wrap"><span class="tooltip-icon">?</span><span class="tooltip-box">Shows how the quantum VQE algorithm converges to the minimum energy over iterations. Each point is one quantum circuit evaluation. The curve dropping shows the optimizer finding a more stable protein conformation.</span></span>
-        </div>
+        <div class="panel-title">⚛ VQE Energy Convergence</div>
         <canvas id="vqe-canvas" height="180" style="width:100%;"></canvas>
       </div>
     </div>
@@ -1715,25 +1595,11 @@ function signOut(){ fbAuth.signOut(); }
     'HELIX·SHEET·COIL·TURN','VQE·AI·FOLD·ENERGY',
     'QUANTUM·PROTEIN·DNA', 'AMINO·ACID·CHAIN·3D',
   ];
-  const COLORS = ['#0d9488','#0f766e','#e05e3a','#059669','#0891b2','#b45309','#0369a1'];
+  const COLORS = ['#5eead4','#93c5fd','#fde68a','#c084fc','#86efac','#fb923c','#67e8f9'];
 
   const overlay = document.getElementById('auth-overlay');
   const ribbonContainer = document.getElementById('aa-ribbons-container');
   const bubbleContainer = document.getElementById('dna-bubbles-container');
-
-  // Build helix side strips
-  ['helix-left','helix-right'].forEach(id=>{
-    const strip = document.getElementById(id);
-    if(!strip) return;
-    const dotColors = ['#0d9488','#e05e3a','#059669','#0891b2','#b45309','#0f766e'];
-    for(let i=0;i<22;i++){
-      const d = document.createElement('div');
-      d.className = 'ahs-dot';
-      d.style.background = dotColors[i%dotColors.length];
-      strip.appendChild(d);
-      if(i<21){const l=document.createElement('div');l.className='ahs-line';strip.appendChild(l);}
-    }
-  });
 
   // Spawn floating ribbons
   function spawnRibbon(){
@@ -1763,7 +1629,7 @@ function signOut(){ fbAuth.signOut(); }
     const top   = 5 + Math.random()*88;
     const dur   = 4 + Math.random()*6;
     const delay = Math.random()*4;
-    el.style.cssText = `width:${size}px;height:${size}px;left:${left}%;top:${top}%;background:${color};opacity:${.06+Math.random()*.08};border:1px solid ${color};animation-duration:${dur}s;animation-delay:${delay}s;`;
+    el.style.cssText = `width:${size}px;height:${size}px;left:${left}%;top:${top}%;background:${color};opacity:${.07+Math.random()*.12};animation-duration:${dur}s;animation-delay:${delay}s;`;
     bubbleContainer && bubbleContainer.appendChild(el);
   }
 
