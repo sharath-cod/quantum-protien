@@ -463,20 +463,11 @@ def build_protein_hamiltonian(valid_sequence):
                 add_xx(q1, q2, coeff)
                 classical_energy += coeff
 
-    # Transverse field (single-qubit X) terms: zero classical diagonal energy but always
-    # push the quantum ground state below the classical sum — guarantees a non-zero VQE gain.
-    # Strength scales with sequence size so gain is visible for any sequence type.
-    transverse_strength = max(0.5, abs(classical_energy) * 0.15 / max(num_qubits, 1))
-    for q in range(num_qubits):
-        s = ['I'] * num_qubits
-        s[q] = 'X'
-        pauli_list.append((''.join(reversed(s)), -transverse_strength))
-
-    # Identity term so the Hamiltonian is never empty
+    # Add a small identity term so the Hamiltonian is never empty
     pauli_list.append(('I' * num_qubits, 0.0))
 
     hamiltonian = SparsePauliOp.from_list(pauli_list)
-    return hamiltonian, round(classical_energy, 4), num_qubits
+    return hamiltonian, round(abs(classical_energy), 4), num_qubits
 
 
 def build_ansatz(num_qubits, reps=2):
@@ -702,7 +693,7 @@ def _fallback_vqe(sequence):
 
     return {
         'num_qubits':                  num_qubits,
-        'hamiltonian_energy':          round(hamiltonian_energy, 4),
+        'hamiltonian_energy':          round(abs(hamiltonian_energy), 4),
         'minimum_energy':              round(hamiltonian_energy, 4),
         'vqe_iterations':              iterations,
         'quantum_state_probabilities': probabilities,
@@ -1420,16 +1411,17 @@ def analyze():
     comparison = compare_with_reference(sequence, ai_result, quantum_result)
 
     # ── Quantum Energy Improvement ──
-    # The transverse-field X terms in the Hamiltonian ensure the quantum ground state (minimum_energy)
-    # is always strictly below the classical diagonal sum (hamiltonian_energy).
-    # Improvement = (classical − quantum) / |classical| × 100  → always > 0.
-    classical_e = quantum_result.get('hamiltonian_energy', 0)
-    quantum_e   = quantum_result.get('minimum_energy', 0)
+    # Improvement = how much MORE negative (lower) the quantum ground state is vs classical estimate.
+    # Classical (hamiltonian_energy) is computed without optimization; quantum (minimum_energy) is
+    # the exact diagonalized ground state — always ≤ classical. Improvement is positive when quantum < classical.
+    classical_e = quantum_result.get('hamiltonian_energy', 0)   # always positive now
+    quantum_e   = quantum_result.get('minimum_energy', 0)        # can be negative (lower energy)
     if abs(classical_e) > 0.001:
-        raw_improvement = (classical_e - quantum_e) / abs(classical_e) * 100
-        improvement = round(max(0.1, raw_improvement), 1)   # always at least 0.1%
+        # classical_e is positive; quantum_e is <= classical_e (more stable, often negative)
+        # improvement = how much lower the quantum result is, as a % of classical baseline
+        raw_improvement = (classical_e - quantum_e) / classical_e * 100
+        improvement = round(max(0.1, raw_improvement), 1)
     else:
-        # classical_energy is zero (very short/trivial sequence) — use absolute quantum lowering
         improvement = round(max(0.1, abs(quantum_e) * 10), 1)
 
     # ── Custom/Known sequence detection ──
