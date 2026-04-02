@@ -5,6 +5,23 @@ import math
 import random
 import time
 import numpy as np
+import os
+
+# ── Gemini (Google Generative AI) — free tier ──
+try:
+    import google.generativeai as genai
+    _gemini_key = os.environ.get("GEMINI_API_KEY", "")
+    if _gemini_key:
+        genai.configure(api_key=_gemini_key)
+        _gemini_model = genai.GenerativeModel("gemini-2.0-flash")
+        GEMINI_AVAILABLE = True
+        print("✅ Gemini AI loaded")
+    else:
+        GEMINI_AVAILABLE = False
+        print("⚠️  GEMINI_API_KEY not set — AI chat disabled")
+except ImportError:
+    GEMINI_AVAILABLE = False
+    print("⚠️  google-generativeai not installed — run: pip install google-generativeai")
 
 # Pre-import Qiskit at startup (avoids slow reimport on every request)
 try:
@@ -33,7 +50,6 @@ CORS(app)
 #             JSON content of your service account key (as a string).
 #             On Render/Railway: add it in the Environment tab.
 
-import os
 
 _firebase_key_env = os.environ.get("FIREBASE_KEY")
 if _firebase_key_env:
@@ -1492,24 +1508,45 @@ def get_results():
         return jsonify({'error': 'Unauthorized'}), 401
 
     uid  = decoded['uid']
+    # NOTE: No .order_by() here — that requires a Firestore composite index.
+    # We filter by uid only, then sort in Python. This works without any index config.
     docs = (db.collection(COLLECTION)
               .where('uid', '==', uid)
-              .order_by('created_at', direction=firestore.Query.DESCENDING)
               .stream())
 
     out = []
     for doc in docs:
         d = doc.to_dict()
+        ts = d.get('created_at')
+        try:
+            created_at_str = ts.isoformat() if ts is not None else None
+        except Exception:
+            created_at_str = str(ts) if ts is not None else None
+
+        final = d.get('final_structure') or {}
         out.append({
-            'id':         doc.id,
-            'name':       d.get('name'),
-            'sequence':   d.get('sequence'),
-            'length':     d.get('length'),
-            'energy':     d.get('energy'),
-            'final':      d.get('final_structure', {}),
-            'has_unknowns': d.get('has_unknowns', False),
-            'created_at': str(d.get('created_at')),
+            'id':               doc.id,
+            'name':             d.get('name'),
+            'sequence':         d.get('sequence'),
+            'length':           d.get('length'),
+            'energy':           d.get('energy'),
+            'final':            final,
+            'dominant_structure': (final.get('dominant_structure')
+                                   or (d.get('ai_result') or {}).get('dominant_structure')
+                                   or '-'),
+            'stability':        (final.get('stability') or '-'),
+            'fold_topology':    (final.get('fold_topology') or '-'),
+            'confidence':       final.get('confidence'),
+            'risk_level':       (final.get('risk_level')
+                                 or (d.get('disease_risk') or {}).get('risk_level')
+                                 or '-'),
+            'has_unknowns':     d.get('has_unknowns', False),
+            'created_at':       created_at_str,
+            '_sort_ts':         ts,   # kept for Python sort, stripped before return
         })
+
+    # Sort newest-first in Python (avoids needing Firestore composite index)
+    out.sort(key=lambda x: (x.pop('_sort_ts') or 0), reverse=True)
     return jsonify(out)
 
 
@@ -1637,6 +1674,118 @@ def get_examples():
          'desc': 'Contains ambiguous IUPAC codes — tests normalization',
          'tag': 'demo'},
     ])
+
+
+
+@app.route('/api/ai-explain', methods=['POST'])
+def ai_explain():
+    """
+    Gemini Gen AI — expert plain-English summary of the full protein analysis.
+    Free via google-generativeai with GEMINI_API_KEY.
+    """
+    decoded = verify_token(request)
+    if not decoded:
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    if not GEMINI_AVAILABLE:
+        return jsonify({'error': 'AI not available. Set GEMINI_API_KEY and install google-generativeai.'}), 503
+
+    data           = request.get_json()
+    ai_result      = data.get('ai_result', {})
+    quantum_result = data.get('quantum_result', {})
+    final          = data.get('final', {})
+    disease_risk   = data.get('disease_risk', {})
+    name           = data.get('name', 'Unknown Protein')
+    sequence       = data.get('sequence', '')
+
+    diseases = ', '.join(d['disease'] for d in disease_risk.get('diseases', [])[:3]) or 'None detected'
+
+    prompt = f"""You are an expert structural biologist embedded in a Quantum AI Protein Folding Analyzer.
+Analyze the following results and write a clear expert summary in exactly 4 sections using **bold** headers:
+
+**1. Structural Summary**
+Explain the dominant structure ({final.get('dominant_structure','-')}), fold topology ({final.get('fold_topology','-')}), and what they mean biologically.
+
+**2. Stability & Quantum Energy**
+Interpret instability index ({ai_result.get('instability_index','-')}), stability ({final.get('stability','-')}), and quantum minimum energy ({final.get('minimum_energy','-')} eV).
+
+**3. Disease Risk Assessment**
+Risk: {disease_risk.get('risk_level','-')} ({disease_risk.get('risk_score',0)}/100). Diseases: {diseases}. Explain the biochemical reasoning.
+
+**4. Researcher Recommendations**
+Give 2-3 concrete next steps (specific assays, mutations to test, or literature).
+
+Protein: {name} | Sequence: {sequence[:60]}{'...' if len(sequence)>60 else ''}
+Length: {ai_result.get('length','-')} aa | MW: {ai_result.get('molecular_weight','-')} Da
+Hydrophobicity: {ai_result.get('hydrophobic_ratio','-')}% | Alpha Helix: {(ai_result.get('confidence_scores') or {{}}).get('Alpha Helix','-')}% | Beta Sheet: {(ai_result.get('confidence_scores') or {{}}).get('Beta Sheet','-')}%
+
+Keep each section 2-4 sentences. Be specific, not generic. No preamble or sign-off."""
+
+    try:
+        response = _gemini_model.generate_content(prompt)
+        return jsonify({'success': True, 'explanation': response.text})
+    except Exception as e:
+        return jsonify({'error': f'Gemini error: {str(e)}'}), 500
+
+
+@app.route('/api/ai-chat', methods=['POST'])
+def ai_chat():
+    """
+    Gemini Gen AI — conversational Q&A about the current protein analysis.
+    Maintains conversation history across turns.
+    """
+    decoded = verify_token(request)
+    if not decoded:
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    if not GEMINI_AVAILABLE:
+        return jsonify({'error': 'AI not available. Set GEMINI_API_KEY and install google-generativeai.'}), 503
+
+    data     = request.get_json()
+    question = data.get('question', '').strip()
+    context  = data.get('context', {})
+    history  = data.get('history', [])   # [{role, content}, ...]
+
+    if not question:
+        return jsonify({'error': 'No question provided'}), 400
+
+    ai_result      = context.get('ai_result', {})
+    quantum_result = context.get('quantum_result', {})
+    final          = context.get('final', {})
+    disease_risk   = context.get('disease_risk', {})
+    name           = context.get('name', 'Unknown Protein')
+    sequence       = context.get('sequence', '')
+    diseases       = ', '.join(d['disease'] for d in disease_risk.get('diseases', [])[:3]) or 'None'
+
+    system_context = f"""You are an expert structural biologist assistant inside a Quantum AI Protein Folding Analyzer.
+Current protein analysis context:
+- Name: {name}
+- Sequence: {sequence[:60]}{'...' if len(sequence)>60 else ''}
+- Length: {ai_result.get('length','-')} aa | MW: {ai_result.get('molecular_weight','-')} Da | pI: {ai_result.get('isoelectric_point','-')}
+- Dominant Structure: {final.get('dominant_structure','-')} | Fold: {final.get('fold_topology','-')}
+- Stability: {final.get('stability','-')} | Instability Index: {ai_result.get('instability_index','-')}
+- Min Quantum Energy: {final.get('minimum_energy','-')} eV
+- Hydrophobicity: {ai_result.get('hydrophobic_ratio','-')}% | Alpha Helix: {(ai_result.get('confidence_scores') or {{}}).get('Alpha Helix','-')}% | Beta Sheet: {(ai_result.get('confidence_scores') or {{}}).get('Beta Sheet','-')}%
+- Disease Risk: {disease_risk.get('risk_level','-')} ({disease_risk.get('risk_score',0)}/100) | Diseases: {diseases}
+- Qubits: {quantum_result.get('num_qubits','-')}
+
+Answer questions about this protein analysis clearly and concisely.
+If asked about the app itself (how it works, what VQE means, what the scores mean) — answer that too.
+Keep answers under 150 words unless detailed explanation is requested. Use markdown for lists."""
+
+    # Build Gemini chat history
+    chat_messages = []
+    for h in history[-6:]:
+        role = 'user' if h.get('role') == 'user' else 'model'
+        chat_messages.append({'role': role, 'parts': [h.get('content', '')]})
+
+    try:
+        chat = _gemini_model.start_chat(history=chat_messages)
+        full_prompt = system_context + "\n\nUser question: " + question
+        response = chat.send_message(full_prompt)
+        return jsonify({'success': True, 'answer': response.text})
+    except Exception as e:
+        return jsonify({'error': f'Gemini error: {str(e)}'}), 500
 
 
 if __name__ == '__main__':
