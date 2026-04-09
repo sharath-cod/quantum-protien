@@ -16,7 +16,7 @@ _HF_API_KEY   = os.environ.get("HF_API_KEY", "")
 #   "mistralai/Mixtral-8x7B-Instruct-v0.1"
 #   "HuggingFaceH4/zephyr-7b-beta"
 _HF_MODEL     = os.environ.get("HF_MODEL", "meta-llama/Meta-Llama-3-8B-Instruct")
-_HF_API_URL   = f"https://api-inference.huggingface.co/models/{_HF_MODEL}/v1/chat/completions"
+_HF_API_URL   = f"https://router.huggingface.co/models/{_HF_MODEL}/v1/chat/completions"
 
 if _HF_API_KEY:
     HF_AVAILABLE = True
