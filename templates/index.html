@@ -1,4 +1,17 @@
 <!DOCTYPE html>
+<!--
+  ╔══════════════════════════════════════════════════════════════╗
+  ║  QUANTUM AI PROTEIN FOLDING SOLVER                           ║
+  ║  Deployment: Render.com (Flask + Gunicorn)                   ║
+  ║  Backend:    app.py  (Flask)                                 ║
+  ║  AI:         Hugging Face Inference API (Llama-3-8B)         ║
+  ║  Auth + DB:  Firebase Auth + Firestore                       ║
+  ║  Quantum:    Qiskit Aer (VQE)                                ║
+  ║                                                              ║
+  ║  All /api/* calls are relative — works on any host.          ║
+  ║  Set env vars on Render: HF_API_KEY, FIREBASE_KEY            ║
+  ╚══════════════════════════════════════════════════════════════╝
+-->
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
@@ -201,6 +214,54 @@ nav{position:relative;z-index:10;background:var(--bg2);border-bottom:2px solid v
 .tc-body{font-size:.85rem;color:var(--dim);line-height:1.7;}
 .tc-code{background:var(--bg3);border:1px solid var(--border);border-radius:4px;
   padding:.7rem;margin-top:.7rem;font-family:monospace;font-size:.75rem;color:var(--accent);white-space:pre;}
+
+/* ── GEN AI STYLES ── */
+.ai-explain-body{font-size:.88rem;color:var(--text);line-height:1.8;white-space:pre-wrap;}
+.ai-explain-body strong{color:var(--accent);font-weight:700;}
+.ai-loading-row{display:flex;align-items:center;gap:.7rem;color:var(--dim);font-size:.85rem;margin-bottom:.6rem;}
+.ai-spinner{width:18px;height:18px;border-radius:50%;border:2px solid var(--border);border-top-color:var(--accent);animation:spin .7s linear infinite;flex-shrink:0;}
+
+/* Chat panel */
+.ai-chat-panel{
+  position:fixed;bottom:1.5rem;right:1.5rem;width:360px;max-height:500px;
+  background:var(--bg2);border:1.5px solid var(--accent);border-radius:16px;
+  box-shadow:0 8px 36px rgba(13,148,136,.25);display:none;flex-direction:column;
+  z-index:2000;overflow:hidden;font-family:'Exo 2',sans-serif;
+}
+.ai-chat-panel.open{display:flex;}
+.ai-chat-header{
+  background:linear-gradient(135deg,#0f766e,#0d9488);
+  padding:.75rem 1rem;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;
+}
+.ai-chat-close{background:none;border:none;color:rgba(255,255,255,.8);cursor:pointer;font-size:1.1rem;padding:.2rem .4rem;border-radius:4px;}
+.ai-chat-close:hover{background:rgba(255,255,255,.15);}
+.ai-chat-messages{flex:1;overflow-y:auto;padding:.8rem;display:flex;flex-direction:column;gap:.55rem;min-height:160px;max-height:320px;}
+.ai-bubble{max-width:90%;padding:.55rem .85rem;border-radius:14px;font-size:.82rem;line-height:1.55;word-break:break-word;}
+.ai-bubble-bot{background:var(--bg3);border:1px solid var(--border);color:var(--text);border-bottom-left-radius:3px;align-self:flex-start;}
+.ai-bubble-bot strong{color:var(--accent);}
+.ai-bubble-user{background:linear-gradient(135deg,rgba(13,148,136,.18),rgba(224,94,58,.12));border:1px solid rgba(13,148,136,.3);color:var(--text);border-bottom-right-radius:3px;align-self:flex-end;}
+.ai-typing{display:inline-flex;gap:4px;padding:.3rem .5rem;}
+.ai-typing span{width:7px;height:7px;border-radius:50%;background:var(--accent);animation:aiDot .9s infinite;}
+.ai-typing span:nth-child(2){animation-delay:.2s;}
+.ai-typing span:nth-child(3){animation-delay:.4s;}
+@keyframes aiDot{0%,60%,100%{transform:translateY(0);}30%{transform:translateY(-7px);}}
+.ai-chat-input-row{padding:.6rem;border-top:1px solid var(--border);display:flex;gap:.4rem;flex-shrink:0;}
+.ai-chat-input{flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.5rem .8rem;font-size:.83rem;color:var(--text);font-family:'Exo 2',sans-serif;}
+.ai-chat-input:focus{outline:none;border-color:var(--accent);}
+.ai-chat-send{background:linear-gradient(135deg,#0f766e,#e05e3a);border:none;color:white;padding:.5rem .9rem;border-radius:8px;cursor:pointer;font-size:.75rem;font-family:'Orbitron',monospace;letter-spacing:1px;white-space:nowrap;}
+.ai-chat-send:hover{opacity:.88;}
+
+/* Floating AI button */
+.ai-fab{
+  display:none;position:fixed;bottom:1.5rem;right:1.5rem;
+  width:52px;height:52px;border-radius:50%;
+  background:linear-gradient(135deg,#0f766e,#e05e3a);
+  border:none;color:white;font-size:1.35rem;cursor:pointer;
+  box-shadow:0 4px 20px rgba(13,148,136,.4);z-index:1999;
+  transition:transform .2s,box-shadow .2s;
+}
+.ai-fab:hover{transform:scale(1.1);box-shadow:0 6px 28px rgba(13,148,136,.55);}
+.ai-fab.visible{display:flex;align-items:center;justify-content:center;}
 
 /* LOADING OVERLAY */
 #loading{display:none;position:fixed;inset:0;background:rgba(245,240,232,.94);z-index:1000;
@@ -1405,8 +1466,55 @@ nav{position:relative;z-index:10;background:var(--bg2);border-bottom:2px solid v
       <div class="compare-grid" id="compare-grid"></div>
     </div>
 
+    <!-- ④ GEN AI EXPERT PANEL (Hugging Face) -->
+    <div class="panel" id="ai-explain-panel" style="display:none;">
+      <div class="panel-title">🤖 GEN AI EXPERT ANALYSIS
+        <span style="font-size:.62rem;color:var(--dim);font-family:'Exo 2',sans-serif;font-weight:400;letter-spacing:0;margin-left:.6rem;">Powered by Hugging Face Inference API · Free</span>
+      </div>
+      <div id="ai-explain-loading" class="ai-loading-row" style="display:none;">
+        <div class="ai-spinner"></div>
+        <span>AI is reading the analysis…</span>
+      </div>
+      <div id="ai-explain-error" style="display:none;color:var(--red);font-size:.82rem;padding:.6rem;border:1px solid var(--red);border-radius:8px;background:rgba(220,38,38,.05);margin-bottom:.7rem;"></div>
+      <div id="ai-explain-text" class="ai-explain-body"></div>
+      <div style="margin-top:1rem;display:flex;gap:.6rem;flex-wrap:wrap;">
+        <button class="viz-btn" id="ai-explain-btn" onclick="fetchAIExplanation()">✨ Generate Expert Summary</button>
+        <button class="viz-btn" onclick="openAIChat()" style="border-color:var(--accent2);color:var(--accent2);">💬 Ask AI a Question</button>
+      </div>
+    </div>
+
   </div>
 </div>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- AI CHAT PANEL (slide-in, bottom-right)    -->
+<!-- ══════════════════════════════════════════ -->
+<div id="ai-chat-panel" class="ai-chat-panel">
+  <div class="ai-chat-header">
+    <div style="display:flex;align-items:center;gap:.5rem;">
+      <span style="font-size:1.2rem;">🤖</span>
+      <div>
+        <div style="font-family:'Orbitron',monospace;font-size:.72rem;color:white;font-weight:700;letter-spacing:1px;">ASK AI ASSISTANT</div>
+        <div style="font-size:.6rem;color:rgba(255,255,255,.65);letter-spacing:.5px;">Ask anything about this protein</div>
+      </div>
+    </div>
+    <button onclick="closeAIChat()" class="ai-chat-close">✕</button>
+  </div>
+  <div id="ai-chat-messages" class="ai-chat-messages">
+    <div class="ai-bubble ai-bubble-bot">
+      👋 Hi! I've read your protein analysis. Ask me anything — structure, disease risk, mutations, what the numbers mean, or how the app works!
+    </div>
+  </div>
+  <div class="ai-chat-input-row">
+    <input id="ai-chat-input" type="text" class="ai-chat-input"
+      placeholder="e.g. Why is this protein at high risk?"
+      onkeydown="if(event.key==='Enter')sendAIChat()">
+    <button onclick="sendAIChat()" class="ai-chat-send">SEND</button>
+  </div>
+</div>
+
+<!-- Floating AI chat button (shows after analysis) -->
+<button id="ai-chat-fab" onclick="openAIChat()" class="ai-fab" title="Ask AI Assistant about this protein">🤖</button>
 
 <!-- ══════════════════════════════════════════ -->
 <!-- PAGE: SAVED                               -->
@@ -1513,6 +1621,7 @@ Applications:
 <!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
 <script>
 // ── FIREBASE CONFIG ──
@@ -1843,10 +1952,17 @@ async function analyze(){
     }
 
     currentResult = data;
+    autoSaveResult(data, name, seq);          // ← save to localStorage immediately
     setPipeline(4);
     switchTab('results');
-    setTimeout(function(){ renderResults(data); }, 80);
-    toast('✅ Analysis complete!');
+    chatHistory = [];                          // reset chat for new protein
+    setTimeout(function(){
+      renderResults(data);
+      document.getElementById('ai-explain-panel').style.display = 'block';
+      document.getElementById('ai-chat-fab').style.display      = 'flex';
+      fetchAIExplanation();                    // auto-trigger Gen AI summary
+    }, 80);
+    toast('✅ Analysis complete — result saved!');
 
   } catch(err){
     clearInterval(stepInterval);
@@ -2424,59 +2540,90 @@ function setVizMode(mode){
 }
 
 // ─────────────────────────────────────────────
-// SAVED RESULTS
+// SAVED RESULTS  — localStorage (instant, no backend needed)
 // ─────────────────────────────────────────────
-async function loadSaved(){
+const LS_KEY = 'qpf_saved_v2';
+
+function getSavedList(){
+  try{ return JSON.parse(localStorage.getItem(LS_KEY) || '[]'); }
+  catch(e){ return []; }
+}
+function setSavedList(arr){
+  localStorage.setItem(LS_KEY, JSON.stringify(arr));
+}
+
+function autoSaveResult(data, name, sequence){
+  const list = getSavedList();
+  const entry = {
+    id:                 Date.now() + '_' + Math.random().toString(36).slice(2,6),
+    name:               name || 'Unnamed Protein',
+    sequence:           sequence,
+    length:             data.ai_result?.length ?? sequence.length,
+    dominant_structure: data.final?.dominant_structure
+                        || data.ai_result?.dominant_structure || '-',
+    stability:          data.final?.stability || '-',
+    fold_topology:      data.final?.fold_topology || '-',
+    confidence:         data.final?.confidence ?? null,
+    energy:             data.final?.minimum_energy
+                        ?? data.quantum_result?.minimum_energy ?? null,
+    risk_level:         data.disease_risk?.risk_level || '-',
+    created_at:         new Date().toISOString(),
+  };
+  // Replace any entry with same sequence to avoid duplicates
+  const deduped = list.filter(r => r.sequence !== sequence);
+  deduped.unshift(entry);
+  setSavedList(deduped.slice(0, 50));
+}
+
+function _escH(s){
+  return String(s||'-').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function loadSaved(){
   const grid = document.getElementById('saved-grid');
-  grid.innerHTML = '<div style="color:var(--dim);padding:2rem;">Loading...</div>';
-  try{
-    const token = await getToken();
-    const res  = await fetch('/api/results', {
-      headers:{'Authorization':'Bearer '+token}
-    });
-    const data = await res.json();
-    if(!res.ok || !Array.isArray(data)){
-      grid.innerHTML='<div style="color:var(--red);padding:2rem;">⚠️ Failed to load results: ' + (data.error||'Unexpected response') + '</div>';
-      return;
-    }
-    if(!data.length){
-      grid.innerHTML='<div style="color:var(--dim);padding:3rem;text-align:center;">🧬 No saved analyses yet.<br>Run an analysis first!</div>';
-      return;
-    }
-    grid.innerHTML = data.map(r=>{
-      const energy   = (r.energy != null) ? Number(r.energy).toFixed(3) : '-';
-      const struct   = r.dominant_structure || r.final?.dominant_structure || '-';
-      const stab     = r.stability          || r.final?.stability          || '-';
-      const risk     = r.risk_level         || '-';
-      const riskBadge = risk === 'High'     ? '⚠️ High'
-                      : risk === 'Moderate' ? '⚡ Moderate'
-                      : risk === 'Low'      ? '✓ Low'
-                      : risk === 'Healthy'  ? '✓ Healthy'
-                      : '';
-      const dateStr  = r.created_at ? new Date(r.created_at).toLocaleDateString() : '-';
-      return `
-      <div class="saved-card">
-        <div class="sc-head">
-          <span class="sc-name">${r.name||'Unnamed'}</span>
-          <span class="sc-badge">${r.length||'?'} aa</span>
-        </div>
-        <div class="sc-seq">${r.sequence||''}</div>
-        <div class="sc-info">
-          <p>🧬 Structure: ${struct}</p>
-          <p>⚡ Min Energy: ${energy} eV</p>
-          <p>🔒 Stability: ${stab}</p>
-          ${riskBadge ? `<p>🩺 Risk: ${riskBadge}</p>` : ''}
-          <p>📅 ${dateStr}</p>
-        </div>
-        <div class="sc-btns">
-          <button class="btn-load" onclick="loadSavedSeq('${(r.sequence||'').replace(/'/g,"\\'")}','${(r.name||'').replace(/'/g,"\\'")}')">📂 Load</button>
-          <button class="btn-del"  onclick="deleteSaved('${r.id}')">🗑 Delete</button>
-        </div>
-      </div>
-    `}).join('');
-  }catch(e){
-    grid.innerHTML='<div style="color:var(--red);">Failed to load results</div>';
+  const list = getSavedList();
+
+  if(!list.length){
+    grid.innerHTML = `<div style="color:var(--dim);padding:3rem;text-align:center;grid-column:1/-1;">
+      🧬 No saved analyses yet.<br>
+      <span style="font-size:.82rem;">Run an analysis — results save automatically!</span>
+    </div>`;
+    return;
   }
+
+  const riskColor = {High:'#dc2626',Moderate:'#d97706',Low:'#059669',Healthy:'#059669'};
+
+  grid.innerHTML = list.map(r => {
+    const energyStr = (r.energy != null) ? Number(r.energy).toFixed(3)+' eV' : '-';
+    const confStr   = (r.confidence != null) ? Number(r.confidence).toFixed(1)+'%' : '-';
+    const dateStr   = r.created_at
+      ? new Date(r.created_at).toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'})
+      : '-';
+    const rc  = riskColor[r.risk_level] || 'var(--dim)';
+    const safeSeq  = (r.sequence||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+    const safeName = (r.name||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+    return `
+    <div class="saved-card">
+      <div class="sc-head">
+        <span class="sc-name">${_escH(r.name)}</span>
+        <span class="sc-badge">${r.length||'?'} aa</span>
+      </div>
+      <div class="sc-seq" title="${_escH(r.sequence)}">${_escH(r.sequence)}</div>
+      <div class="sc-info">
+        <p>🧬 Structure: <strong>${_escH(r.dominant_structure)}</strong></p>
+        <p>⚡ Min Energy: <strong>${energyStr}</strong></p>
+        <p>🔒 Stability: <strong>${_escH(r.stability)}</strong></p>
+        <p>🎯 Fold: <strong>${_escH(r.fold_topology)}</strong></p>
+        <p>🧪 Confidence: <strong>${confStr}</strong></p>
+        <p style="color:${rc};">⚕ Risk: <strong>${_escH(r.risk_level)}</strong></p>
+        <p style="color:var(--dim);font-size:.7rem;">📅 ${dateStr}</p>
+      </div>
+      <div class="sc-btns">
+        <button class="btn-load" onclick="loadSavedSeq('${safeSeq}','${safeName}')">📂 Load</button>
+        <button class="btn-del"  onclick="deleteSaved('${r.id}')">🗑 Delete</button>
+      </div>
+    </div>`;
+  }).join('');
 }
 
 function loadSavedSeq(seq, name){
@@ -2487,10 +2634,10 @@ function loadSavedSeq(seq, name){
   toast('📂 Sequence loaded! Click Analyze to re-run.');
 }
 
-async function deleteSaved(id){
-  if(!confirm('Delete this analysis?')) return;
-  const token = await getToken();
-  await fetch(`/api/results/${id}`, {method:'DELETE', headers:{'Authorization':'Bearer '+token}});
+function deleteSaved(id){
+  if(!confirm('Delete this saved analysis?')) return;
+  const list = getSavedList().filter(r => r.id !== id);
+  setSavedList(list);
   loadSaved();
   toast('🗑 Deleted');
 }
@@ -2840,6 +2987,159 @@ function toast(msg){
   const t=document.getElementById('toast');
   t.textContent=msg; t.classList.add('show');
   setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+// ─────────────────────────────────────────────
+// GEN AI — EXPERT EXPLANATION (Hugging Face)
+// ─────────────────────────────────────────────
+async function fetchAIExplanation(){
+  if(!currentResult) return;
+  const loadingEl = document.getElementById('ai-explain-loading');
+  const errEl     = document.getElementById('ai-explain-error');
+  const textEl    = document.getElementById('ai-explain-text');
+  const btn       = document.getElementById('ai-explain-btn');
+
+  loadingEl.style.display = 'flex';
+  errEl.style.display     = 'none';
+  textEl.innerHTML        = '';
+  btn.disabled            = true;
+  btn.textContent         = '⏳ Generating…';
+
+  try{
+    const token = await getToken();
+    const seq   = document.getElementById('seq-input').value.toUpperCase().replace(/\s/g,'');
+    const name  = document.getElementById('protein-name').value || 'Unnamed Protein';
+
+    const res  = await fetch('/api/ai-explain', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+      body: JSON.stringify({
+        ai_result:      currentResult.ai_result,
+        quantum_result: currentResult.quantum_result,
+        final:          currentResult.final,
+        disease_risk:   currentResult.disease_risk,
+        name, sequence: seq,
+      })
+    });
+    const data = await res.json();
+    loadingEl.style.display = 'none';
+
+    if(!res.ok || !data.success){
+      errEl.style.display = 'block';
+      errEl.textContent   = '⚠️ ' + (data.error || 'AI explanation failed');
+      btn.disabled        = false;
+      btn.textContent     = '✨ Retry';
+      return;
+    }
+
+    // Render **bold** markdown and newlines
+    textEl.innerHTML = data.explanation
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+      .replace(/\n/g,'<br>');
+
+    btn.disabled    = false;
+    btn.textContent = '🔄 Regenerate';
+  } catch(err){
+    document.getElementById('ai-explain-loading').style.display = 'none';
+    errEl.style.display = 'block';
+    errEl.textContent   = '⚠️ Network error: ' + err.message;
+    btn.disabled        = false;
+    btn.textContent     = '✨ Retry';
+  }
+}
+
+// ─────────────────────────────────────────────
+// GEN AI — CHAT (Hugging Face)
+// ─────────────────────────────────────────────
+let chatHistory = [];
+
+function openAIChat(){
+  document.getElementById('ai-chat-fab').classList.remove('visible');
+  document.getElementById('ai-chat-panel').classList.add('open');
+  document.getElementById('ai-chat-input').focus();
+}
+
+function closeAIChat(){
+  document.getElementById('ai-chat-panel').classList.remove('open');
+  if(currentResult) document.getElementById('ai-chat-fab').classList.add('visible');
+}
+
+function _addBubble(role, html){
+  const msgs = document.getElementById('ai-chat-messages');
+  const div  = document.createElement('div');
+  div.className = 'ai-bubble ' + (role==='user' ? 'ai-bubble-user' : 'ai-bubble-bot');
+  div.innerHTML  = html;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+  return div;
+}
+
+function _showTyping(){
+  const msgs = document.getElementById('ai-chat-messages');
+  const div  = document.createElement('div');
+  div.id        = 'ai-typing';
+  div.className = 'ai-bubble ai-bubble-bot ai-typing';
+  div.innerHTML = '<span></span><span></span><span></span>';
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+function _hideTyping(){ const el=document.getElementById('ai-typing'); if(el) el.remove(); }
+
+function _safeHtml(s){
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function _mdToHtml(s){
+  return _safeHtml(s)
+    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+    .replace(/\n/g,'<br>');
+}
+
+async function sendAIChat(){
+  if(!currentResult){ toast('⚠️ Run an analysis first'); return; }
+  const input = document.getElementById('ai-chat-input');
+  const q     = input.value.trim();
+  if(!q) return;
+  input.value = '';
+
+  _addBubble('user', _safeHtml(q));
+  chatHistory.push({role:'user', content:q});
+  _showTyping();
+
+  try{
+    const token = await getToken();
+    const seq   = document.getElementById('seq-input').value.toUpperCase().replace(/\s/g,'');
+    const name  = document.getElementById('protein-name').value || 'Unnamed Protein';
+
+    const res  = await fetch('/api/ai-chat', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+      body: JSON.stringify({
+        question: q,
+        history:  chatHistory.slice(-8),
+        context:  {
+          ai_result:      currentResult.ai_result,
+          quantum_result: currentResult.quantum_result,
+          final:          currentResult.final,
+          disease_risk:   currentResult.disease_risk,
+          name, sequence: seq,
+        }
+      })
+    });
+    const data = await res.json();
+    _hideTyping();
+
+    if(!res.ok || !data.success){
+      _addBubble('ai','⚠️ '+_safeHtml(data.error||'Something went wrong'));
+      return;
+    }
+
+    _addBubble('ai', _mdToHtml(data.answer));
+    chatHistory.push({role:'assistant', content:data.answer});
+  } catch(err){
+    _hideTyping();
+    _addBubble('ai','⚠️ Network error: '+_safeHtml(err.message));
+  }
 }
 </script>
 </body>
