@@ -5,6 +5,54 @@ import math
 import random
 import time
 import numpy as np
+import os
+
+# ── Hugging Face Inference API ──
+import requests as _hf_requests
+
+_HF_API_KEY   = os.environ.get("HF_API_KEY", "")
+# Model: Meta-Llama-3-8B-Instruct is free on HF Inference API (serverless)
+# You can swap to any chat model that supports the Messages API, e.g.:
+#   "mistralai/Mixtral-8x7B-Instruct-v0.1"
+#   "HuggingFaceH4/zephyr-7b-beta"
+_HF_MODEL     = os.environ.get("HF_MODEL", "meta-llama/Meta-Llama-3-8B-Instruct")
+_HF_API_URL   = f"https://api-inference.huggingface.co/models/{_HF_MODEL}/v1/chat/completions"
+
+if _HF_API_KEY:
+    HF_AVAILABLE = True
+    print(f"✅ Hugging Face AI loaded — model: {_HF_MODEL}")
+else:
+    HF_AVAILABLE = False
+    print("⚠️  HF_API_KEY not set — AI chat disabled. Get a free key at huggingface.co/settings/tokens")
+
+
+def _hf_chat(system_prompt: str, messages: list, max_tokens: int = 600) -> str:
+    """
+    Call the Hugging Face Inference API (Messages / OpenAI-compatible format).
+    messages = [{"role": "user"|"assistant", "content": str}, ...]
+    Returns the reply text.
+    Raises RuntimeError on failure.
+    """
+    payload = {
+        "model": _HF_MODEL,
+        "messages": [{"role": "system", "content": system_prompt}] + messages,
+        "max_tokens": max_tokens,
+        "temperature": 0.7,
+        "stream": False,
+    }
+    resp = _hf_requests.post(
+        _HF_API_URL,
+        headers={
+            "Authorization": f"Bearer {_HF_API_KEY}",
+            "Content-Type": "application/json",
+        },
+        json=payload,
+        timeout=60,
+    )
+    if resp.status_code != 200:
+        raise RuntimeError(f"HF API error {resp.status_code}: {resp.text[:300]}")
+    data = resp.json()
+    return data["choices"][0]["message"]["content"]
 
 # Pre-import Qiskit at startup (avoids slow reimport on every request)
 try:
@@ -33,7 +81,6 @@ CORS(app)
 #             JSON content of your service account key (as a string).
 #             On Render/Railway: add it in the Environment tab.
 
-import os
 
 _firebase_key_env = os.environ.get("FIREBASE_KEY")
 if _firebase_key_env:
@@ -1453,15 +1500,6 @@ def analyze():
     }
 
     # ── Save to Firestore ──
-    # Strip large/heavy fields to stay well under Firestore's 1 MB document limit.
-    # coords_3d, aa_breakdown, vqe_iterations, and energy_landscape can be thousands
-    # of entries and are only needed for live rendering — not for the Saved tab cards.
-    ai_result_slim = {k: v for k, v in ai_result.items()
-                      if k not in ('coords_3d', 'aa_breakdown', 'per_residue_ss', 'sse_regions')}
-    quantum_result_slim = {k: v for k, v in quantum_result.items()
-                           if k not in ('vqe_iterations', 'energy_landscape',
-                                        'quantum_state_probabilities')}
-
     doc_ref = db.collection(COLLECTION).document()
     doc_ref.set({
         'uid':            uid,
@@ -1469,15 +1507,12 @@ def analyze():
         'sequence':       sequence,
         'original_input': raw_sequence,
         'length':         ai_result['length'],
-        'ai_result':      ai_result_slim,
-        'quantum_result': quantum_result_slim,
+        'ai_result':      ai_result,
+        'quantum_result': quantum_result,
         'final_structure':final,
         'disease_risk':   disease_risk,
         'comparison':     comparison,
         'energy':         quantum_result['minimum_energy'],
-        'dominant_structure': ai_result['dominant_structure'],
-        'stability':      final['stability'],
-        'risk_level':     disease_risk['risk_level'],
         'has_unknowns':   ai_result['input_notes']['has_unknowns'],
         'sequence_tag':   sequence_tag,
         'created_at':     firestore.SERVER_TIMESTAMP,
@@ -1504,15 +1539,15 @@ def get_results():
         return jsonify({'error': 'Unauthorized'}), 401
 
     uid  = decoded['uid']
+    # NOTE: No .order_by() here — that requires a Firestore composite index.
+    # We filter by uid only, then sort in Python. This works without any index config.
     docs = (db.collection(COLLECTION)
               .where('uid', '==', uid)
-              .order_by('created_at', direction=firestore.Query.DESCENDING)
               .stream())
 
     out = []
     for doc in docs:
         d = doc.to_dict()
-        # Safely serialize the Firestore SERVER_TIMESTAMP (DatetimeWithNanoseconds)
         ts = d.get('created_at')
         try:
             created_at_str = ts.isoformat() if ts is not None else None
@@ -1520,30 +1555,29 @@ def get_results():
             created_at_str = str(ts) if ts is not None else None
 
         final = d.get('final_structure') or {}
-        dominant_structure = (
-            d.get('dominant_structure')
-            or final.get('dominant_structure')
-            or d.get('ai_result', {}).get('dominant_structure')
-        )
-        stability = d.get('stability') or final.get('stability')
-        risk_level = (
-            d.get('risk_level')
-            or final.get('risk_level')
-            or d.get('disease_risk', {}).get('risk_level')
-        )
         out.append({
-            'id':                 doc.id,
-            'name':               d.get('name'),
-            'sequence':           d.get('sequence'),
-            'length':             d.get('length'),
-            'energy':             d.get('energy'),
-            'final':              final,
-            'dominant_structure': dominant_structure,
-            'stability':          stability,
-            'risk_level':         risk_level,
-            'has_unknowns':       d.get('has_unknowns', False),
-            'created_at':         created_at_str,
+            'id':               doc.id,
+            'name':             d.get('name'),
+            'sequence':         d.get('sequence'),
+            'length':           d.get('length'),
+            'energy':           d.get('energy'),
+            'final':            final,
+            'dominant_structure': (final.get('dominant_structure')
+                                   or (d.get('ai_result') or {}).get('dominant_structure')
+                                   or '-'),
+            'stability':        (final.get('stability') or '-'),
+            'fold_topology':    (final.get('fold_topology') or '-'),
+            'confidence':       final.get('confidence'),
+            'risk_level':       (final.get('risk_level')
+                                 or (d.get('disease_risk') or {}).get('risk_level')
+                                 or '-'),
+            'has_unknowns':     d.get('has_unknowns', False),
+            'created_at':       created_at_str,
+            '_sort_ts':         ts,   # kept for Python sort, stripped before return
         })
+
+    # Sort newest-first in Python (avoids needing Firestore composite index)
+    out.sort(key=lambda x: (x.pop('_sort_ts') or 0), reverse=True)
     return jsonify(out)
 
 
@@ -1671,6 +1705,120 @@ def get_examples():
          'desc': 'Contains ambiguous IUPAC codes — tests normalization',
          'tag': 'demo'},
     ])
+
+
+
+@app.route('/api/ai-explain', methods=['POST'])
+def ai_explain():
+    """
+    Hugging Face Gen AI — expert plain-English summary of the full protein analysis.
+    Free via HF Inference API with HF_API_KEY.
+    """
+    decoded = verify_token(request)
+    if not decoded:
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    if not HF_AVAILABLE:
+        return jsonify({'error': 'AI not available. Set HF_API_KEY (free at huggingface.co/settings/tokens).'}), 503
+
+    data           = request.get_json()
+    ai_result      = data.get('ai_result', {})
+    quantum_result = data.get('quantum_result', {})
+    final          = data.get('final', {})
+    disease_risk   = data.get('disease_risk', {})
+    name           = data.get('name', 'Unknown Protein')
+    sequence       = data.get('sequence', '')
+
+    diseases = ', '.join(d['disease'] for d in disease_risk.get('diseases', [])[:3]) or 'None detected'
+
+    system_prompt = "You are an expert structural biologist embedded in a Quantum AI Protein Folding Analyzer. Be specific, concise and scientific. No preamble or sign-off."
+
+    user_msg = f"""Analyze these protein folding results and write a clear expert summary in exactly 4 sections using **bold** headers:
+
+**1. Structural Summary**
+Explain the dominant structure ({final.get('dominant_structure','-')}), fold topology ({final.get('fold_topology','-')}), and what they mean biologically.
+
+**2. Stability & Quantum Energy**
+Interpret instability index ({ai_result.get('instability_index','-')}), stability ({final.get('stability','-')}), and quantum minimum energy ({final.get('minimum_energy','-')} eV).
+
+**3. Disease Risk Assessment**
+Risk: {disease_risk.get('risk_level','-')} ({disease_risk.get('risk_score',0)}/100). Diseases: {diseases}. Explain the biochemical reasoning.
+
+**4. Researcher Recommendations**
+Give 2-3 concrete next steps (specific assays, mutations to test, or literature).
+
+Protein: {name} | Sequence: {sequence[:60]}{'...' if len(sequence)>60 else ''}
+Length: {ai_result.get('length','-')} aa | MW: {ai_result.get('molecular_weight','-')} Da
+Hydrophobicity: {ai_result.get('hydrophobic_ratio','-')}% | Alpha Helix: {(ai_result.get('confidence_scores') or {{}}).get('Alpha Helix','-')}% | Beta Sheet: {(ai_result.get('confidence_scores') or {{}}).get('Beta Sheet','-')}%
+
+Keep each section 2-4 sentences. Be specific, not generic."""
+
+    try:
+        explanation = _hf_chat(system_prompt, [{"role": "user", "content": user_msg}], max_tokens=700)
+        return jsonify({'success': True, 'explanation': explanation})
+    except Exception as e:
+        return jsonify({'error': f'Hugging Face API error: {str(e)}'}), 500
+
+
+@app.route('/api/ai-chat', methods=['POST'])
+def ai_chat():
+    """
+    Hugging Face Gen AI — conversational Q&A about the current protein analysis.
+    Maintains conversation history across turns.
+    """
+    decoded = verify_token(request)
+    if not decoded:
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    if not HF_AVAILABLE:
+        return jsonify({'error': 'AI not available. Set HF_API_KEY (free at huggingface.co/settings/tokens).'}), 503
+
+    data     = request.get_json()
+    question = data.get('question', '').strip()
+    context  = data.get('context', {})
+    history  = data.get('history', [])   # [{role, content}, ...]
+
+    if not question:
+        return jsonify({'error': 'No question provided'}), 400
+
+    ai_result      = context.get('ai_result', {})
+    quantum_result = context.get('quantum_result', {})
+    final          = context.get('final', {})
+    disease_risk   = context.get('disease_risk', {})
+    name           = context.get('name', 'Unknown Protein')
+    sequence       = context.get('sequence', '')
+    diseases       = ', '.join(d['disease'] for d in disease_risk.get('diseases', [])[:3]) or 'None'
+
+    system_context = f"""You are an expert structural biologist assistant inside a Quantum AI Protein Folding Analyzer.
+Current protein analysis context:
+- Name: {name}
+- Sequence: {sequence[:60]}{'...' if len(sequence)>60 else ''}
+- Length: {ai_result.get('length','-')} aa | MW: {ai_result.get('molecular_weight','-')} Da | pI: {ai_result.get('isoelectric_point','-')}
+- Dominant Structure: {final.get('dominant_structure','-')} | Fold: {final.get('fold_topology','-')}
+- Stability: {final.get('stability','-')} | Instability Index: {ai_result.get('instability_index','-')}
+- Min Quantum Energy: {final.get('minimum_energy','-')} eV
+- Hydrophobicity: {ai_result.get('hydrophobic_ratio','-')}% | Alpha Helix: {(ai_result.get('confidence_scores') or {{}}).get('Alpha Helix','-')}% | Beta Sheet: {(ai_result.get('confidence_scores') or {{}}).get('Beta Sheet','-')}%
+- Disease Risk: {disease_risk.get('risk_level','-')} ({disease_risk.get('risk_score',0)}/100) | Diseases: {diseases}
+- Qubits: {quantum_result.get('num_qubits','-')}
+
+Answer questions about this protein analysis clearly and concisely.
+If asked about the app itself (how it works, what VQE means, what the scores mean) — answer that too.
+Keep answers under 150 words unless detailed explanation is requested. Use markdown for lists."""
+
+    # Build HF chat history (last 6 turns)
+    chat_messages = []
+    for h in history[-6:]:
+        role = 'user' if h.get('role') == 'user' else 'assistant'
+        chat_messages.append({'role': role, 'content': h.get('content', '')})
+
+    # Append current question
+    chat_messages.append({'role': 'user', 'content': question})
+
+    try:
+        answer = _hf_chat(system_context, chat_messages, max_tokens=400)
+        return jsonify({'success': True, 'answer': answer})
+    except Exception as e:
+        return jsonify({'error': f'Hugging Face API error: {str(e)}'}), 500
 
 
 if __name__ == '__main__':
