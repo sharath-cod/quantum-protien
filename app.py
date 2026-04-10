@@ -15,8 +15,8 @@ _HF_API_KEY   = os.environ.get("HF_API_KEY", "")
 # You can swap to any chat model that supports the Messages API, e.g.:
 #   "mistralai/Mixtral-8x7B-Instruct-v0.1"
 #   "HuggingFaceH4/zephyr-7b-beta"
-_HF_MODEL     = os.environ.get("HF_MODEL", "mistralai/Mistral-7B-Instruct-v0.3")
-_HF_API_URL   = f"https://router.huggingface.co/hf-inference/models/{_HF_MODEL}/v1/chat/completions"
+_HF_MODEL     = os.environ.get("HF_MODEL", "meta-llama/Llama-3.1-8B-Instruct")
+_HF_API_URL   = "https://router.huggingface.co/v1/chat/completions"
 
 if _HF_API_KEY:
     HF_AVAILABLE = True
