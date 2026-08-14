@@ -539,7 +539,11 @@ def build_protein_hamiltonian(valid_sequence):
     # of being hard-capped at 4. Still trivially fast to diagonalize on a
     # simulator (2^10 = 1024-dim matrix solves in milliseconds), so this
     # buys real structural resolution without hurting response time.
-    num_qubits = max(2, min(10, int(math.ceil(math.log2(n + 1) * 1.5))))
+    # Lowered from 10 → 6 as a safety margin for Render's free-tier CPU
+    # (heavier VQE optimization at higher qubit counts risked hitting
+    # Gunicorn's worker timeout). Revert to 10 once the --timeout 120
+    # start-command fix is confirmed sufficient on its own.
+    num_qubits = max(2, min(6, int(math.ceil(math.log2(n + 1) * 1.5))))
     def qubit_for(i):
         return min(int(i * num_qubits / n), num_qubits - 1)
 
