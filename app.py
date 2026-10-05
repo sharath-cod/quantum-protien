@@ -54,6 +54,17 @@ def _hf_chat(system_prompt: str, messages: list, max_tokens: int = 600) -> str:
     data = resp.json()
     return data["choices"][0]["message"]["content"]
 
+# ── RAG: our own Retrieval-Augmented Generation layer (see protein_rag/ and kb/) ──
+# Retrieves relevant passages from the knowledge base and pastes them into the
+# LLM prompt. If anything goes wrong here the app still boots, with plain chat.
+try:
+    from protein_rag import (RAG_RULES, build_query, build_reference_block,
+                             get_rag, public_sources)
+    _rag = get_rag()
+except Exception as _rag_err:
+    print(f"⚠️  RAG disabled: {_rag_err}")
+    _rag = None
+
 # Pre-import Qiskit at startup (avoids slow reimport on every request)
 try:
     from qiskit.quantum_info import SparsePauliOp
@@ -1983,6 +1994,19 @@ def ai_explain():
 
     system_prompt = "You are an expert structural biologist embedded in a Quantum AI Protein Folding Analyzer. Be specific, concise and scientific. No preamble or sign-off."
 
+    # RAG: pull background knowledge relevant to THIS analysis into the prompt
+    rag_sources = []
+    if _rag:
+        try:
+            rag_query = (f"{final.get('dominant_structure', '')} {final.get('fold_topology', '')} "
+                         f"{final.get('stability', '')} instability index hydrophobicity "
+                         f"quantum energy {diseases}")
+            hits = _rag.search(rag_query, k=5)
+            system_prompt += "\n\n" + RAG_RULES + "\n\n" + build_reference_block(hits)
+            rag_sources = public_sources(hits)
+        except Exception as e:
+            print(f"[rag] explain retrieval failed: {e}")
+
     user_msg = f"""Analyze these protein folding results and write a clear expert summary in exactly 4 sections using **bold** headers:
 
 **1. Structural Summary**
@@ -2005,7 +2029,7 @@ Keep each section 2-4 sentences. Be specific, not generic."""
 
     try:
         explanation = _hf_chat(system_prompt, [{"role": "user", "content": user_msg}], max_tokens=700)
-        return jsonify({'success': True, 'explanation': explanation})
+        return jsonify({'success': True, 'explanation': explanation, 'sources': rag_sources})
     except Exception as e:
         return jsonify({'error': f'Hugging Face API error: {str(e)}'}), 500
 
@@ -2055,6 +2079,16 @@ Answer questions about this protein analysis clearly and concisely.
 If asked about the app itself (how it works, what VQE means, what the scores mean) — answer that too.
 Keep answers under 150 words unless detailed explanation is requested. Use markdown for lists."""
 
+    # RAG: retrieve knowledge-base passages for this question and append to the system prompt
+    rag_sources = []
+    if _rag:
+        try:
+            hits = _rag.search(build_query(question, context, history), k=4)
+            system_context += "\n\n" + RAG_RULES + "\n\n" + build_reference_block(hits)
+            rag_sources = public_sources(hits)
+        except Exception as e:
+            print(f"[rag] chat retrieval failed: {e}")
+
     # Build HF chat history (last 6 turns)
     chat_messages = []
     for h in history[-6:]:
@@ -2066,9 +2100,27 @@ Keep answers under 150 words unless detailed explanation is requested. Use markd
 
     try:
         answer = _hf_chat(system_context, chat_messages, max_tokens=400)
-        return jsonify({'success': True, 'answer': answer})
+        return jsonify({'success': True, 'answer': answer, 'sources': rag_sources})
     except Exception as e:
         return jsonify({'error': f'Hugging Face API error: {str(e)}'}), 500
+
+
+@app.route('/api/rag/search', methods=['POST'])
+def rag_search():
+    """
+    Debug/teaching endpoint: shows exactly which knowledge-base chunks the
+    retriever returns for a query (no LLM involved). Body: {"q": "...", "k": 4}
+    """
+    if not verify_token(request):
+        return jsonify({'error': 'Unauthorized'}), 401
+    if not _rag:
+        return jsonify({'error': 'RAG is not enabled'}), 503
+    data = request.get_json(silent=True) or {}
+    q = str(data.get('q', '')).strip()
+    if not q:
+        return jsonify({'error': 'No query provided'}), 400
+    k = max(1, min(int(data.get('k', 4)), 10))
+    return jsonify({'success': True, 'query': q, 'hits': _rag.search(q, k=k)})
 
 
 if __name__ == '__main__':

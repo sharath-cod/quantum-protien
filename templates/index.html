@@ -5377,6 +5377,7 @@
           .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
           .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
           .replace(/\n/g, '<br>');
+        textEl.innerHTML += _sourcesHtml(data.sources);
 
         btn.disabled = false;
         btn.textContent = '🔄 Regenerate';
@@ -5435,6 +5436,14 @@
         .replace(/\n/g, '<br>');
     }
 
+    // RAG: show which knowledge-base passages the answer was grounded on
+    function _sourcesHtml(sources) {
+      if (!sources || !sources.length) return '';
+      const items = sources.map(s => '[' + s.n + '] ' + _safeHtml(s.title)).join('<br>');
+      return '<div style="margin-top:.6rem;padding-top:.45rem;border-top:1px solid rgba(255,255,255,.12);'
+           + 'font-size:.72rem;opacity:.75;line-height:1.5;">📚 <strong>Sources</strong><br>' + items + '</div>';
+    }
+
     async function sendAIChat() {
       if (!currentResult) { toast('⚠️ Run an analysis first'); return; }
       const input = document.getElementById('ai-chat-input');
@@ -5474,7 +5483,7 @@
           return;
         }
 
-        _addBubble('ai', _mdToHtml(data.answer));
+        _addBubble('ai', _mdToHtml(data.answer) + _sourcesHtml(data.sources));
         chatHistory.push({ role: 'assistant', content: data.answer });
       } catch (err) {
         _hideTyping();

@@ -5,3 +5,6 @@ __pycache__/
 .env
 venv/
 env/
+
+# RAG embedding cache (regenerated automatically)
+kb/.embeddings_cache.json
