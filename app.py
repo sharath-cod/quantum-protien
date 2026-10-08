@@ -10,21 +10,20 @@ import os
 # ── Hugging Face Inference API ──
 import requests as _hf_requests
 
-_HF_API_KEY   = os.environ.get("HF_API_KEY", "")
+_HF_API_KEY   = os.environ.get("GROQ_API_KEY", "")
 # Model: Meta-Llama-3-8B-Instruct is free on HF Inference API (serverless)
 # You can swap to any chat model that supports the Messages API, e.g.:
 #   "mistralai/Mixtral-8x7B-Instruct-v0.1"
 #   "HuggingFaceH4/zephyr-7b-beta"
-_HF_MODEL     = os.environ.get("HF_MODEL", "meta-llama/Llama-3.1-8B-Instruct")
-_HF_API_URL   = "https://router.huggingface.co/v1/chat/completions"
+_HF_MODEL     = os.environ.get("GROQ_MODEL", "meta-llama/Llama-3.1-8B-Instruct")
+_HF_API_URL   = "https://api.groq.com/openai/v1/chat/completions"
 
 if _HF_API_KEY:
     HF_AVAILABLE = True
-    print(f"✅ Hugging Face AI loaded — model: {_HF_MODEL}")
+    print(f"✅ Groq AI loaded — model: {_HF_MODEL}")
 else:
     HF_AVAILABLE = False
-    print("⚠️  HF_API_KEY not set — AI chat disabled. Get a free key at huggingface.co/settings/tokens")
-
+    print("⚠️  GROQ_API_KEY not set — AI chat disabled. Get a free key at console.groq.com/keys")
 
 def _hf_chat(system_prompt: str, messages: list, max_tokens: int = 600) -> str:
     """
@@ -1980,7 +1979,7 @@ def ai_explain():
         return jsonify({'error': 'Unauthorized'}), 401
 
     if not HF_AVAILABLE:
-        return jsonify({'error': 'AI not available. Set HF_API_KEY (free at huggingface.co/settings/tokens).'}), 503
+        return jsonify({'error': 'AI not available. Set GROQ_API_KEY.'}), 503
 
     data           = request.get_json()
     ai_result      = data.get('ai_result', {})
@@ -2031,7 +2030,7 @@ Keep each section 2-4 sentences. Be specific, not generic."""
         explanation = _hf_chat(system_prompt, [{"role": "user", "content": user_msg}], max_tokens=700)
         return jsonify({'success': True, 'explanation': explanation, 'sources': rag_sources})
     except Exception as e:
-        return jsonify({'error': f'Hugging Face API error: {str(e)}'}), 500
+        return jsonify({'error': f'Groq API error: {str(e)}'}), 500
 
 
 @app.route('/api/ai-chat', methods=['POST'])
