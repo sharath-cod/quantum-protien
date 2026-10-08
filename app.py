@@ -35,9 +35,10 @@ def _hf_chat(system_prompt: str, messages: list, max_tokens: int = 600) -> str:
     payload = {
         "model": _HF_MODEL,
         "messages": [{"role": "system", "content": system_prompt}] + messages,
-        "max_tokens": max_tokens,
+        "max_tokens": max(max_tokens,1500),
         "temperature": 0.7,
         "stream": False,
+        "reasoning_effort": "low",
     }
     resp = _hf_requests.post(
         _HF_API_URL,
