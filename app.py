@@ -15,7 +15,7 @@ _HF_API_KEY   = os.environ.get("GROQ_API_KEY", "")
 # You can swap to any chat model that supports the Messages API, e.g.:
 #   "mistralai/Mixtral-8x7B-Instruct-v0.1"
 #   "HuggingFaceH4/zephyr-7b-beta"
-_HF_MODEL     = os.environ.get("GROQ_MODEL", "meta-llama/Llama-3.1-8B-Instruct")
+_HF_MODEL     = os.environ.get("GROQ_MODEL", "openai/gpt-oss-20b")
 _HF_API_URL   = "https://api.groq.com/openai/v1/chat/completions"
 
 if _HF_API_KEY:
